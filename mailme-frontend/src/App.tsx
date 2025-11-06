@@ -15,8 +15,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/mailbox/:username" element={<Mailbox />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/mailbox" element={<Mailbox />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

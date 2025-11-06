@@ -62,29 +62,34 @@ export function startSmtpServer() {
               where: { username },
             });
 
-            // If you want to accept all addresses without prior create, create mailbox on the fly:
             if (!mailbox) {
-              console.log(
-                `[SMTP] Mailbox ${username} not found — creating on-the-fly`
-              );
-              await prisma.mailbox.create({
-                data: {
-                  username,
-                  domain: domain,
-                },
-              });
-            }
-
-            const mailboxFinal = await prisma.mailbox.findUnique({
-              where: { username },
-            });
-
-            if (!mailboxFinal) {
-              console.warn(
-                `[SMTP] ⚠️ Could not create/find mailbox ${username}`
-              );
+              console.warn(`[SMTP] ⚠️ Could not find mailbox for ${username}`);
               return;
             }
+
+            // If there are no mailboxes for this username, those mails should be discarded
+            // if (!mailbox) {
+            //   console.log(
+            //     `[SMTP] Mailbox ${username} not found — creating on-the-fly`
+            //   );
+            //   await prisma.mailbox.create({
+            //     data: {
+            //       username,
+            //       domain: domain,
+            //     },
+            //   });
+            // }
+
+            // const mailboxFinal = await prisma.mailbox.findUnique({
+            //   where: { username },
+            // });
+
+            // if (!mailboxFinal) {
+            //   console.warn(
+            //     `[SMTP] ⚠️ Could not create/find mailbox ${username}`
+            //   );
+            //   return;
+            // }
 
             // Handle parsed.from which can be AddressObject or AddressObject[]
             const fromValue = Array.isArray(parsed.from)
@@ -98,7 +103,7 @@ export function startSmtpServer() {
 
             await prisma.email.create({
               data: {
-                mailboxId: mailboxFinal.id,
+                mailboxId: mailbox.id,
                 to: toText,
                 from: fromText,
                 subject: parsed.subject ?? null,

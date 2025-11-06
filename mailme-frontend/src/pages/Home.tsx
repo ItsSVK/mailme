@@ -6,16 +6,25 @@ import { Card } from '@/components/ui/card';
 import { ArrowRight, Shield, Clock, Zap } from 'lucide-react';
 import heroImage from '@/assets/hero-email.jpg';
 import Header from '@/components/Header';
+import { useCreateMailbox } from '@/hooks/useMailbox';
 
 const Home = () => {
   const [username, setUsername] = useState('');
   const [isValidUsername, setIsValidUsername] = useState(false);
   const navigate = useNavigate();
+  const { mutateAsync, isPending } = useCreateMailbox();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isValidUsername) {
-      navigate(`/mailbox/${username}`);
+      try {
+        await mutateAsync(username.trim());
+        // Store username in sessionStorage to hide it from URL
+        sessionStorage.setItem('mailboxUsername', username.trim());
+        navigate('/mailbox');
+      } catch (error) {
+        // Error is handled by the mutation hook
+      }
     }
   };
 
@@ -94,9 +103,9 @@ const Home = () => {
                     type="submit"
                     size="lg"
                     className="w-full h-12 text-base bg-linear-to-r from-primary to-primary-glow hover:opacity-90 transition-opacity cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
-                    disabled={!isValidUsername}
+                    disabled={!isValidUsername || isPending}
                   >
-                    Check Mailbox
+                    {isPending ? 'Creating...' : 'Check Mailbox'}
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </form>

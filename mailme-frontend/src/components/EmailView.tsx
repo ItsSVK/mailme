@@ -8,6 +8,7 @@ interface EmailViewProps {
     subject: string;
     content: string;
     timestamp: string;
+    html?: string | null;
   } | null;
   onBack?: () => void;
 }
@@ -56,9 +57,16 @@ const EmailView = ({ email, onBack }: EmailViewProps) => {
       </div>
 
       <div className="flex-1 overflow-auto">
-        <div className="prose prose-sm max-w-none text-foreground">
-          {email.content}
-        </div>
+        {email.html ? (
+          <div
+            className="prose prose-sm max-w-none text-foreground"
+            dangerouslySetInnerHTML={{ __html: email.html }}
+          />
+        ) : (
+          <div className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap">
+            {email.content}
+          </div>
+        )}
       </div>
     </Card>
   );

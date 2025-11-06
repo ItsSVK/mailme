@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import EmailList, { Email } from '@/components/EmailList';
 import EmailView from '@/components/EmailView';
@@ -7,57 +7,94 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check, Copy, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { useEmails } from '@/hooks/useMailbox';
+import type { Email as ApiEmail } from '@/lib/api';
 
-// Mock data for demonstration
-const mockEmails: Email[] = [
-  {
-    id: '1',
-    from: 'welcome@service.com',
-    subject: 'Welcome to our service!',
-    preview: "Thank you for signing up. We're excited to have you on board...",
-    timestamp: '2 min ago',
-    read: false,
-  },
-  {
-    id: '2',
-    from: 'noreply@updates.com',
-    subject: 'Your verification code',
-    preview: 'Your verification code is: 123456. This code will expire in...',
-    timestamp: '15 min ago',
-    read: false,
-  },
-  {
-    id: '3',
-    from: 'newsletter@tech.com',
-    subject: 'Weekly Tech Digest',
-    preview: "Here are this week's top stories in technology and innovation...",
-    timestamp: '1 hour ago',
-    read: true,
-  },
-];
+// Helper to format timestamp
+function formatTimestamp(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
 
-const mockEmailContents: Record<string, string> = {
-  '1': "Thank you for signing up for our service! We're excited to have you on board. Get started by exploring our features and customizing your experience. ",
-  '2': "Your verification code is: 123456\n\nThis code will expire in 10 minutes. Please use it to complete your registration.\n\nIf you didn't request this code, please ignore this email.",
-  '3': "Here are this week's top stories in technology and innovation:\n\n1. AI breakthroughs in natural language processing\n2. New developments in quantum computing\n3. Sustainable tech solutions for climate change\n\nRead more on our website.",
-};
+  if (diffMins < 1) return 'just now';
+  if (diffMins < 60) return `${diffMins} min ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+  return date.toLocaleDateString();
+}
+
+// Convert API email to component email format
+function convertEmail(apiEmail: ApiEmail): Email {
+  const preview = apiEmail.text || apiEmail.html || 'No content';
+  // Strip HTML tags for preview
+  const textPreview = preview.replace(/<[^>]*>/g, '').substring(0, 100);
+
+  return {
+    id: apiEmail.id,
+    from: apiEmail.from,
+    subject: apiEmail.subject || '(no subject)',
+    preview: textPreview + (textPreview.length >= 100 ? '...' : ''),
+    timestamp: formatTimestamp(apiEmail.createdAt),
+    read: false, // We'll track this in state
+  };
+}
 
 const Mailbox = () => {
-  const { username } = useParams();
-  const [emails, setEmails] = useState<Email[]>(mockEmails);
+  const navigate = useNavigate();
+  const [username, setUsername] = useState<string | null>(null);
   const [selectedEmailId, setSelectedEmailId] = useState<string>();
   const [copied, setCopied] = useState(false);
+  const [readEmails, setReadEmails] = useState<Set<string>>(new Set());
 
-  const tempEmail = `${username}@${
-    import.meta.env.VITE_DOMAIN || 'mailme.local'
-  }`;
+  // Get username from sessionStorage and redirect if not found
+  useEffect(() => {
+    const storedUsername = sessionStorage.getItem('mailboxUsername');
+    if (!storedUsername) {
+      // Redirect to home if username is not in sessionStorage
+      navigate('/');
+      return;
+    }
+    setUsername(storedUsername);
+  }, [navigate]);
+
+  // Fetch emails with auto-refresh every 15 seconds
+  const {
+    data: apiEmails = [],
+    isLoading,
+    isFetching,
+    refetch,
+  } = useEmails(username || undefined, {
+    enabled: !!username,
+    refetchInterval: 15000, // Poll every 15 seconds
+  });
+
+  // Convert API emails to component format and mark read status
+  const emails = useMemo(() => {
+    return apiEmails.map(convertEmail).map(email => ({
+      ...email,
+      read: readEmails.has(email.id),
+    }));
+  }, [apiEmails, readEmails]);
+
+  const tempEmail = username
+    ? `${username}@${import.meta.env.VITE_DOMAIN || 'mailme.local'}`
+    : '';
 
   const selectedEmail = selectedEmailId
-    ? {
-        ...emails.find(e => e.id === selectedEmailId)!,
-        content:
-          mockEmailContents[selectedEmailId] || 'Email content not found',
-      }
+    ? (() => {
+        const apiEmail = apiEmails.find(e => e.id === selectedEmailId);
+        if (!apiEmail) return null;
+        return {
+          from: apiEmail.from,
+          subject: apiEmail.subject || '(no subject)',
+          content: apiEmail.html || apiEmail.text || 'No content available',
+          timestamp: formatTimestamp(apiEmail.createdAt),
+          html: apiEmail.html,
+        };
+      })()
     : null;
 
   const handleCopyEmail = async () => {
@@ -69,16 +106,20 @@ const Mailbox = () => {
     }, 1000);
   };
 
-  const handleRefresh = () => {
-    toast.success('Checking for new emails...');
+  const handleRefresh = async () => {
+    toast.info('Checking for new emails...');
+    await refetch();
   };
 
   const handleSelectEmail = (id: string) => {
     setSelectedEmailId(id);
-    setEmails(
-      emails.map(email => (email.id === id ? { ...email, read: true } : email))
-    );
+    setReadEmails(prev => new Set(prev).add(id));
   };
+
+  // Don't render if username is not available (will redirect)
+  if (!username) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-background">
@@ -116,9 +157,12 @@ const Mailbox = () => {
               variant="outline"
               size="sm"
               onClick={handleRefresh}
-              className="cursor-pointer hover:opacity-90 transition-opacity"
+              disabled={isFetching}
+              className="cursor-pointer hover:opacity-90 transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <RefreshCw className="w-4 h-4 mr-2" />
+              <RefreshCw
+                className={`w-4 h-4 mr-2 ${isFetching ? 'animate-spin' : ''}`}
+              />
               Refresh
             </Button>
           </div>
@@ -130,11 +174,17 @@ const Mailbox = () => {
               selectedEmailId ? 'hidden lg:block' : ''
             }`}
           >
-            <EmailList
-              emails={emails}
-              selectedEmailId={selectedEmailId}
-              onSelectEmail={handleSelectEmail}
-            />
+            {isLoading ? (
+              <Card className="p-8 text-center">
+                <p className="text-muted-foreground">Loading emails...</p>
+              </Card>
+            ) : (
+              <EmailList
+                emails={emails}
+                selectedEmailId={selectedEmailId}
+                onSelectEmail={handleSelectEmail}
+              />
+            )}
           </div>
 
           <div
