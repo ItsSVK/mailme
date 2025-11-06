@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log
+bun.lockb
+.git
+.gitignore
+Dockerfile
+README.md
+*.log
+.dist
+.env
+
+# Exclude local sqlite db if using external volume (compose mounts prisma/)
+# Uncomment to avoid copying local data into the image layer
+# prisma/dev.db
+

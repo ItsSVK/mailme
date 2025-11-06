@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./mailme-backend
+    container_name: mailme-backend
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - SMTP_PORT=2525
+      - DOMAIN=${DOMAIN:-mailme.local}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:8080}
+    ports:
+      - "4000:4000"
+      - "2525:2525"
+    volumes:
+      - db-data:/app/prisma
+
+  frontend:
+    build:
+      context: ./mailme-frontend
+      args:
+        # This value is baked into the frontend at build time
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:4000/api}
+    container_name: mailme-frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  db-data:
+    driver: local
+
+

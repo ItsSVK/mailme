@@ -1,0 +1,13 @@
+node_modules
+npm-debug.log
+bun.lockb
+.git
+.gitignore
+Dockerfile
+README.md
+*.log
+.dist
+.env
+dist
+coverage
+
