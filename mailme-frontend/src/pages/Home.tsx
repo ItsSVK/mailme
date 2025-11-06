@@ -67,7 +67,7 @@ const Home = () => {
                           Your email:{' '}
                           <span className="font-medium text-foreground">
                             {username || 'yourname'}@
-                            {import.meta.env.VITE_DOMAIN || 'mailme.itssvk.dev'}
+                            {import.meta.env.VITE_DOMAIN || 'mailme.local'}
                           </span>
                         </p>
                       ) : (
@@ -84,7 +84,7 @@ const Home = () => {
                           Your email:{' '}
                           <span className="font-medium dark:text-green-500 text-blue-500">
                             {username || 'yourname'}@
-                            {import.meta.env.VITE_DOMAIN || 'mailme.itssvk.dev'}
+                            {import.meta.env.VITE_DOMAIN || 'mailme.local'}
                           </span>
                         </p>
                       ))}

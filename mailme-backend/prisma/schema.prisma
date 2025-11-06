@@ -1,0 +1,31 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "sqlite"
+    url      = "file:./dev.db"
+}
+
+model Mailbox {
+    id        String   @id @default(cuid())
+    username  String   @unique
+    domain    String
+    createdAt DateTime @default(now())
+    emails    Email[]
+}
+
+model Email {
+    id        String   @id @default(cuid())
+    mailbox   Mailbox  @relation(fields: [mailboxId], references: [id])
+    mailboxId String
+    to        String
+    from      String
+    subject   String?
+    text      String?
+    html      String?
+    raw       String? // optional raw message
+    createdAt DateTime @default(now())
+
+    @@index([mailboxId, createdAt])
+}

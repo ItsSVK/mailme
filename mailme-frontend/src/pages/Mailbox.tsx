@@ -49,7 +49,7 @@ const Mailbox = () => {
   const [copied, setCopied] = useState(false);
 
   const tempEmail = `${username}@${
-    import.meta.env.VITE_DOMAIN || 'mailme.itssvk.dev'
+    import.meta.env.VITE_DOMAIN || 'mailme.local'
   }`;
 
   const selectedEmail = selectedEmailId
