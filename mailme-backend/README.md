@@ -22,46 +22,56 @@ A lightweight email server backend that receives emails via SMTP and provides a 
 
 ## API Endpoints
 
-- `POST /api/mails` - Create a new mailbox
+- `POST /mails` - Create a new mailbox
+
   - Body: `{ "username": "string" }`
   - Returns: Mailbox details including email address
 
-- `GET /api/mails/:username` - Retrieve emails for a mailbox
+- `GET /mails/:username` - Retrieve emails for a mailbox
   - Query params: `?since=ISODate` (optional) - fetch emails since this date
   - Returns: Array of emails with metadata and content
 
 ## Setup Instructions
 
 1. **Install dependencies:**
+
    ```bash
    bun install
    ```
 
 2. **Set up environment variables:**
+
    ```bash
    cp .env.example .env
    ```
-   
+
    Edit `.env` and configure:
+
    - `PORT` - HTTP API port (default: 4000)
    - `SMTP_PORT` - SMTP server port (default: 2525)
    - `DOMAIN` - Domain for email addresses (default: mailme.local)
    - `EMAIL_TTL_HOURS` - How long to keep emails in hours (default: 24)
 
 3. **Generate Prisma client:**
+
    ```bash
    bun run prisma:generate
    ```
+
    or
+
    ```bash
    bunx prisma generate
    ```
 
 4. **Run database migrations:**
+
    ```bash
    bun run prisma:migrate
    ```
+
    or
+
    ```bash
    bunx prisma migrate dev
    ```
@@ -72,12 +82,14 @@ A lightweight email server backend that receives emails via SMTP and provides a 
    ```
 
 The server will start:
+
 - HTTP API on `http://localhost:4000` (or your configured PORT)
 - SMTP server on port `2525` (or your configured SMTP_PORT)
 
 ## Environment Variables
 
 See `.env.example` for all available configuration options:
+
 - `PORT` - HTTP API port
 - `SMTP_PORT` - SMTP server port
 - `DOMAIN` - Email domain (e.g., mailme.local)
@@ -87,6 +99,7 @@ See `.env.example` for all available configuration options:
 ## Development
 
 This project uses:
+
 - [Bun](https://bun.com) - Fast JavaScript runtime
 - [Express](https://expressjs.com) - Web framework
 - [Prisma](https://www.prisma.io) - Database ORM

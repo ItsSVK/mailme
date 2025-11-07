@@ -1,5 +1,4 @@
 import express from 'express';
-import bodyParser from 'body-parser';
 import cors from 'cors';
 import emailsRoute from './routes/emails';
 
@@ -14,9 +13,9 @@ export function createApp() {
     })
   );
 
-  app.use(bodyParser.json());
+  app.use(express.json());
 
-  app.use('/api/mails', emailsRoute); // POST /api/mails & GET /api/mails/:username
+  app.use('/mails', emailsRoute); // POST /mails & GET /mails/:username
 
   app.get('/', (_req, res) => res.send('MailMe backend running'));
 

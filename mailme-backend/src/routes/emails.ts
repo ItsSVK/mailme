@@ -4,7 +4,7 @@ import { prisma } from '../prisma';
 const router = Router();
 
 /**
- * GET /api/mails/:username
+ * GET /mails/:username
  * Query params:
  *   ?since=ISODate (optional) - fetch emails since this date
  */
@@ -48,7 +48,7 @@ router.get('/:username', async (req, res) => {
 });
 
 /**
- * POST /api/mails
+ * POST /mails
  * body: { username: string }
  */
 router.post('/', async (req, res) => {
