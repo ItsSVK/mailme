@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import emailsRoute from './routes/emails';
+import webhookRoute from './routes/webhook';
 
 export function createApp() {
   const app = express();
@@ -16,6 +17,7 @@ export function createApp() {
   app.use(express.json());
 
   app.use('/mails', emailsRoute); // POST /mails & GET /mails/:username
+  app.use('/webhook', webhookRoute); // POST /webhook/forwardemail
 
   app.get('/', (_req, res) => res.send('MailMe backend running'));
 
