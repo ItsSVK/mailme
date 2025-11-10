@@ -64,13 +64,14 @@ services:
     container_name: mailme-certbot-renew
     depends_on:
       - nginx
+      - certbot
     volumes:
       - ./nginx/certbot/conf:/etc/letsencrypt
       - ./nginx/certbot/www:/var/www/certbot
     networks:
       - mailme-network
-    entrypoint: /bin/sh -c
-    command: "trap exit TERM; while :; do certbot renew --webroot --webroot-path=/var/www/certbot; sleep 12h & wait $${!}; done"
+    entrypoint: /bin/sh
+    command: -c "trap exit TERM; sleep 60; while :; do certbot renew --webroot --webroot-path=/var/www/certbot --quiet || true; sleep 43200; done"
     restart: unless-stopped
 
 networks:

@@ -1,6 +1,7 @@
-import { Router } from 'express';
+import express, { Router } from 'express';
 import { createHmac } from 'crypto';
 import { prisma } from '../prisma';
+import { simpleParser } from 'mailparser';
 
 const router = Router();
 
@@ -246,3 +247,86 @@ router.post('/resend', async (req, res) => {
 });
 
 export default router;
+
+/**
+ * POST /webhook/cloudflare
+ * Accept raw RFC822 email from a Cloudflare Email Worker
+ *
+ * Configure your Worker to POST the raw message with:
+ *  - Content-Type: message/rfc822
+ *  - Authorization: Bearer <WEBHOOK_SECRET> (optional)
+ *  - X-Email-To / X-Email-From (optional hints; raw is parsed server-side)
+ */
+router.post(
+  '/cloudflare',
+  // Route-level raw body parser so we can feed it to mailparser
+  express.raw({ type: '*/*', limit: '15mb' }),
+  async (req, res) => {
+    try {
+      // Optional webhook secret verification (reuse WEBHOOK_SECRET)
+      const webhookSecret = process.env.WEBHOOK_SECRET;
+      if (webhookSecret) {
+        const providedSecret =
+          req.headers.authorization?.replace('Bearer ', '') ||
+          (req.query.secret as string);
+
+        if (providedSecret !== webhookSecret) {
+          console.warn('[Webhook] ⚠️ Invalid webhook secret (cloudflare)');
+          return res.status(401).json({ error: 'Unauthorized' });
+        }
+      }
+
+      if (!req.body || !(req.body instanceof Buffer)) {
+        console.warn('[Webhook] Missing raw body for Cloudflare email');
+        return res.status(400).json({ error: 'Missing raw body' });
+      }
+
+      const parsed = await simpleParser(req.body as Buffer);
+
+      // Extract fields similar to SMTP flow
+      const toValue = Array.isArray(parsed.to) ? parsed.to[0] : parsed.to;
+      const toAddress = toValue?.value?.[0]?.address ?? '';
+      const fromValue = Array.isArray(parsed.from)
+        ? parsed.from[0]
+        : parsed.from;
+      const fromText =
+        fromValue?.text ?? fromValue?.value?.[0]?.address ?? 'unknown';
+
+      const subject = parsed.subject ?? null;
+      const text = parsed.text ?? null;
+      const html =
+        parsed.html && typeof parsed.html === 'string' ? parsed.html : null;
+
+      if (!fromText || !toAddress) {
+        console.warn(
+          '[Webhook] Missing from/to after parsing Cloudflare email'
+        );
+        return res
+          .status(400)
+          .json({ error: 'Missing required fields: from and to' });
+      }
+
+      const domain = process.env.DOMAIN ?? 'mailme.local';
+      const username = await saveEmail(
+        fromText,
+        toAddress,
+        subject,
+        text,
+        html,
+        domain
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: 'Email received and processed',
+        username,
+      });
+    } catch (err) {
+      console.error('[Webhook] ❌ Error processing Cloudflare email:', err);
+      return res.status(500).json({
+        error: 'Internal server error',
+        message: err instanceof Error ? err.message : 'Unknown error',
+      });
+    }
+  }
+);
