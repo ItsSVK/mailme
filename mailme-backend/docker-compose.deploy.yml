@@ -18,6 +18,8 @@ services:
       - "25:${SMTP_PORT:-2525}"
     volumes:
       - db-data:/app/prisma
+    networks:
+      - mailme-network
     restart: unless-stopped
 
   nginx:
@@ -32,7 +34,11 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/certbot/conf:/etc/letsencrypt
       - ./nginx/certbot/www:/var/www/certbot
+      - ./nginx/init-nginx.sh:/docker-entrypoint.d/init-nginx.sh
+    networks:
+      - mailme-network
     restart: unless-stopped
+    entrypoint: ["/bin/sh", "/docker-entrypoint.d/init-nginx.sh"]
 
   certbot:
     image: certbot/certbot
@@ -42,6 +48,8 @@ services:
     volumes:
       - ./nginx/certbot/conf:/etc/letsencrypt
       - ./nginx/certbot/www:/var/www/certbot
+    networks:
+      - mailme-network
     restart: no
     command: >
       certonly --webroot
@@ -54,12 +62,20 @@ services:
   certbot-renew:
     image: certbot/certbot
     container_name: mailme-certbot-renew
+    depends_on:
+      - nginx
     volumes:
       - ./nginx/certbot/conf:/etc/letsencrypt
       - ./nginx/certbot/www:/var/www/certbot
+    networks:
+      - mailme-network
     entrypoint: /bin/sh -c
-    command: "trap exit TERM; while :; do certbot renew --webroot --webroot-path=/var/www/certbot && nginx -s reload || true; sleep 12h & wait $${!}; done"
+    command: "trap exit TERM; while :; do certbot renew --webroot --webroot-path=/var/www/certbot; sleep 12h & wait $${!}; done"
     restart: unless-stopped
+
+networks:
+  mailme-network:
+    driver: bridge
 
 volumes:
   db-data:
