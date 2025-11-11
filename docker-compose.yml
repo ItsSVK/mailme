@@ -8,12 +8,10 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=4000
-      - SMTP_PORT=2525
       - DOMAIN=${DOMAIN:-mailme.local}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:8080}
     ports:
       - "4000:4000"
-      - "2525:2525"
     volumes:
       - db-data:/app/prisma
 
@@ -32,5 +30,3 @@ services:
 volumes:
   db-data:
     driver: local
-
-

@@ -39,13 +39,8 @@ async function saveEmail(
   });
 
   if (!mailbox) {
-    console.log(`[Webhook] Creating mailbox for ${username}`);
-    mailbox = await prisma.mailbox.create({
-      data: {
-        username,
-        domain,
-      },
-    });
+    console.log(`[Webhook] Mailbox not found for ${username}, returning null`);
+    return null;
   }
 
   // Prepare email data
@@ -145,11 +140,17 @@ router.post(
         domain
       );
 
-      return res.status(200).json({
-        success: true,
-        message: 'Email received and processed',
-        username,
-      });
+      if (username === null) {
+        return res
+          .status(200)
+          .json({ success: false, error: 'Mailbox not found' });
+      } else {
+        return res.status(200).json({
+          success: true,
+          message: 'Email received and processed',
+          username,
+        });
+      }
     } catch (err) {
       console.error('[Webhook] ❌ Error processing Cloudflare email:', err);
       return res.status(500).json({

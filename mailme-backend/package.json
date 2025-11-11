@@ -8,7 +8,10 @@
     "build": "bun build src/index.ts --target=bun --outdir dist",
     "start": "bun dist/index.js",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev --name init"
+    "prisma:migrate": "prisma migrate dev --name init",
+    "wl": "cd cloudflare && wrangler login",
+    "wd": "cd cloudflare && wrangler deploy",
+    "wt": "cd cloudflare && wrangler tail"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
@@ -18,6 +21,7 @@
     "smtp-server": "^3.16.1"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251111.0",
     "@types/bun": "latest",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",

@@ -8,14 +8,10 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=${PORT:-4000}
-      - SMTP_PORT=${SMTP_PORT:-2525}
       - DOMAIN=${DOMAIN:-mailme.itssvk.dev}
       - FRONTEND_URL=${FRONTEND_URL:-https://mailme.itssvk.dev}
     expose:
       - "${PORT:-4000}"
-      - "${SMTP_PORT:-2525}"
-    ports:
-      - "25:${SMTP_PORT:-2525}"
     volumes:
       - db-data:/app/prisma
     networks:

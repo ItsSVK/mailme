@@ -3,6 +3,9 @@
 FROM oven/bun:1 as base
 WORKDIR /app
 
+# Install OpenSSL for Prisma
+RUN apt-get update -y && apt-get install -y openssl libssl-dev && rm -rf /var/lib/apt/lists/*
+
 # Install dependencies separately for better caching
 COPY package.json bun.lock ./
 RUN bun install --production --frozen-lockfile
@@ -19,6 +22,9 @@ RUN bun run build
 FROM oven/bun:1
 WORKDIR /app
 ENV NODE_ENV=production
+
+# Install OpenSSL for Prisma
+RUN apt-get update -y && apt-get install -y openssl libssl-dev && rm -rf /var/lib/apt/lists/*
 
 # Copy node_modules (bun) and build output and prisma schema
 COPY --from=base /app/node_modules ./node_modules

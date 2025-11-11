@@ -1,0 +1,13 @@
+name = "mailme-email-worker"
+main = "worker.ts"
+compatibility_date = "2025-01-01"
+
+# Note: BACKEND_WEBHOOK_URL and WEBHOOK_SECRET should be set via:
+# 1. wrangler secret put WEBHOOK_SECRET (for secrets)
+# 2. wrangler secret put BACKEND_WEBHOOK_URL (or set in dashboard)
+# Or use the dashboard: Workers & Pages > mailme-email-worker > Settings > Variables
+
+[vars]
+# BACKEND_WEBHOOK_URL = "https://mailmeapi.itssvk.dev/webhook/cloudflare"
+# WEBHOOK_SECRET = "super-secret"
+# Note: Secrets should be set via wrangler secret put, not in vars
