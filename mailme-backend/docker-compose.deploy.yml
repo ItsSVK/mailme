@@ -29,49 +29,10 @@ services:
       - backend
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/certbot/conf:/etc/letsencrypt
-      - ./nginx/certbot/www:/var/www/certbot
-      - ./nginx/init-nginx.sh:/docker-entrypoint.d/init-nginx.sh
     networks:
       - mailme-network
-    restart: unless-stopped
-    entrypoint: ["/bin/sh", "/docker-entrypoint.d/init-nginx.sh"]
-
-  certbot:
-    image: certbot/certbot
-    container_name: mailme-certbot
-    depends_on:
-      - nginx
-    volumes:
-      - ./nginx/certbot/conf:/etc/letsencrypt
-      - ./nginx/certbot/www:/var/www/certbot
-    networks:
-      - mailme-network
-    restart: no
-    command: >
-      certonly --webroot
-        --webroot-path=/var/www/certbot
-        --email admin@itssvk.dev
-        --domains mailmeapi.itssvk.dev
-        --agree-tos
-        --non-interactive
-
-  certbot-renew:
-    image: certbot/certbot
-    container_name: mailme-certbot-renew
-    depends_on:
-      - nginx
-      - certbot
-    volumes:
-      - ./nginx/certbot/conf:/etc/letsencrypt
-      - ./nginx/certbot/www:/var/www/certbot
-    networks:
-      - mailme-network
-    entrypoint: /bin/sh
-    command: -c "trap exit TERM; sleep 60; while :; do certbot renew --webroot --webroot-path=/var/www/certbot --quiet || true; sleep 43200; done"
     restart: unless-stopped
 
 networks:

@@ -1,7 +1,8 @@
 import express, { Router } from 'express';
-import { createHmac } from 'crypto';
 import { prisma } from '../prisma';
 import { simpleParser } from 'mailparser';
+import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
 
 const router = Router();
 
@@ -75,178 +76,6 @@ async function saveEmail(
 
   return username;
 }
-
-/**
- * POST /webhook/forwardemail
- * Webhook endpoint to receive forwarded emails from forwardemail.net
- *
- * Optional: Set WEBHOOK_SECRET environment variable to enable webhook verification
- * The webhook secret should be sent in the Authorization header or as a query parameter
- *
- * Expected payload format from forwardemail.net:
- * {
- *   from: string,
- *   to: string,
- *   subject?: string,
- *   text?: string,
- *   html?: string,
- *   attachments?: Array<{...}>
- * }
- */
-router.post('/forwardemail', async (req, res) => {
-  try {
-    // Optional webhook secret verification
-    const webhookSecret = process.env.WEBHOOK_SECRET;
-    if (webhookSecret) {
-      const providedSecret =
-        req.headers.authorization?.replace('Bearer ', '') ||
-        (req.query.secret as string);
-
-      if (providedSecret !== webhookSecret) {
-        console.warn('[Webhook] ⚠️ Invalid webhook secret');
-        return res.status(401).json({ error: 'Unauthorized' });
-      }
-    }
-
-    const { from, to, subject, text, html, attachments } = req.body;
-
-    // Validate required fields
-    if (!from || !to) {
-      console.warn('[Webhook] Missing required fields: from or to');
-      return res
-        .status(400)
-        .json({ error: 'Missing required fields: from and to' });
-    }
-
-    console.log(`[Webhook] 📧 Received email from ${from} to ${to}`);
-
-    const domain = process.env.DOMAIN ?? 'mailme.local';
-    const username = await saveEmail(from, to, subject, text, html, domain);
-
-    // Return success response
-    return res.status(200).json({
-      success: true,
-      message: 'Email received and processed',
-      username,
-    });
-  } catch (err) {
-    console.error('[Webhook] ❌ Error processing webhook:', err);
-    return res.status(500).json({
-      error: 'Internal server error',
-      message: err instanceof Error ? err.message : 'Unknown error',
-    });
-  }
-});
-
-/**
- * POST /webhook/resend
- * Webhook endpoint to receive forwarded emails from Resend
- *
- * Resend uses Svix for webhook signing. Set RESEND_WEBHOOK_SECRET environment variable
- * to enable webhook signature verification.
- *
- * Expected payload format from Resend:
- * {
- *   type: "email.received",
- *   data: {
- *     email_id: string,
- *     from: string,
- *     to: string[],
- *     subject?: string,
- *     text?: string,
- *     html?: string,
- *     attachments?: Array<{...}>
- *   }
- * }
- */
-router.post('/resend', async (req, res) => {
-  try {
-    // Verify Svix signature if secret is configured
-    const resendSecret = process.env.RESEND_WEBHOOK_SECRET;
-    if (resendSecret) {
-      const signature = req.headers['svix-signature'] as string;
-      const timestamp = req.headers['svix-timestamp'] as string;
-
-      if (!signature || !timestamp) {
-        console.warn('[Webhook] ⚠️ Missing Svix signature headers');
-        return res.status(401).json({ error: 'Missing signature headers' });
-      }
-
-      // Svix signature format: v1=signature1 v1=signature2 (space-separated)
-      // We need to verify the signature
-      const rawBody = JSON.stringify(req.body);
-      const signedPayload = `${timestamp}.${rawBody}`;
-      const expectedSignature = createHmac('sha256', resendSecret)
-        .update(signedPayload)
-        .digest('base64');
-
-      // Extract the signature from the header (format: v1=signature, space-separated)
-      const signatureParts = signature.split(' ');
-      const receivedSignature = signatureParts
-        .find(part => part.startsWith('v1='))
-        ?.replace('v1=', '');
-
-      if (!receivedSignature || receivedSignature !== expectedSignature) {
-        console.warn('[Webhook] ⚠️ Invalid Svix signature');
-        return res.status(401).json({ error: 'Invalid signature' });
-      }
-    }
-
-    const { type, data } = req.body;
-
-    // Only process email.received events
-    if (type !== 'email.received') {
-      console.log(`[Webhook] Ignoring event type: ${type}`);
-      return res
-        .status(200)
-        .json({ message: 'Event received but not processed' });
-    }
-
-    if (!data) {
-      console.warn('[Webhook] Missing data in payload');
-      return res.status(400).json({ error: 'Missing data in payload' });
-    }
-
-    const { from, to, subject, text, html, attachments } = data;
-
-    // Resend sends 'to' as an array, we need to handle the first recipient
-    const toAddress = Array.isArray(to) ? to[0] : to;
-
-    if (!from || !toAddress) {
-      console.warn('[Webhook] Missing required fields: from or to');
-      return res
-        .status(400)
-        .json({ error: 'Missing required fields: from and to' });
-    }
-
-    console.log(`[Webhook] 📧 Received email from ${from} to ${toAddress}`);
-
-    const domain = process.env.DOMAIN ?? 'mailme.local';
-    const username = await saveEmail(
-      from,
-      toAddress,
-      subject,
-      text,
-      html,
-      domain
-    );
-
-    // Return success response
-    return res.status(200).json({
-      success: true,
-      message: 'Email received and processed',
-      username,
-    });
-  } catch (err) {
-    console.error('[Webhook] ❌ Error processing Resend webhook:', err);
-    return res.status(500).json({
-      error: 'Internal server error',
-      message: err instanceof Error ? err.message : 'Unknown error',
-    });
-  }
-});
-
-export default router;
 
 /**
  * POST /webhook/cloudflare
@@ -330,3 +159,188 @@ router.post(
     }
   }
 );
+
+/**
+ * POST /webhook/debug
+ * Debug endpoint to capture and save complete request as a curl command
+ * Useful for testing webhook payloads via Postman - saves curl command you can copy/paste
+ *
+ * Saves requests to: ./webhook-debug/ directory with timestamped filenames
+ * - .json file: Full request data in JSON format
+ * - .sh file: Executable curl command
+ */
+router.post(
+  '/debug',
+  // Accept any content type and capture raw body
+  express.raw({ type: '*/*', limit: '50mb' }),
+  async (req, res) => {
+    try {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const jsonFilename = `webhook-request-${timestamp}.json`;
+      const curlFilename = `webhook-request-${timestamp}.sh`;
+
+      // Create debug directory if it doesn't exist
+      const debugDir = join(process.cwd(), 'webhook-debug');
+      try {
+        await mkdir(debugDir, { recursive: true });
+      } catch (err) {
+        // Directory might already exist, ignore error
+      }
+
+      // Capture all headers
+      const headers: Record<string, string | string[] | undefined> = {};
+      Object.keys(req.headers).forEach(key => {
+        headers[key] = req.headers[key];
+      });
+
+      // Get the full URL
+      const protocol = req.protocol || 'http';
+      const host = req.get('host') || 'localhost:4000';
+      const baseUrl = `${protocol}://${host}`;
+
+      // Build URL with query parameters
+      let url = `${baseUrl}${req.path}`;
+      const queryParams = new URLSearchParams();
+      Object.keys(req.query).forEach(key => {
+        const value = req.query[key];
+        if (value) {
+          queryParams.append(key, String(value));
+        }
+      });
+      if (queryParams.toString()) {
+        url += `?${queryParams.toString()}`;
+      }
+
+      // Try to parse body as JSON if possible, otherwise keep as base64
+      let body: any;
+      let rawBodyBase64: string | undefined;
+      let bodyString: string | undefined;
+
+      if (req.body instanceof Buffer) {
+        rawBodyBase64 = req.body.toString('base64');
+        bodyString = req.body.toString('utf-8');
+
+        // Try to parse as JSON
+        try {
+          body = JSON.parse(bodyString);
+        } catch {
+          // Not JSON, keep as text
+          body = bodyString;
+        }
+      } else {
+        body = req.body;
+        bodyString =
+          typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+      }
+
+      // Capture query parameters
+      const query = req.query;
+
+      // Create request object to save
+      const requestData = {
+        timestamp: new Date().toISOString(),
+        method: req.method,
+        url: req.url,
+        path: req.path,
+        query,
+        headers,
+        body,
+        rawBodyBase64: rawBodyBase64 || undefined,
+        bodySize: req.body instanceof Buffer ? req.body.length : undefined,
+        contentType: req.headers['content-type'] || 'unknown',
+      };
+
+      // Generate curl command
+      const curlParts: string[] = [];
+      curlParts.push(`curl --location '${url}'`);
+      curlParts.push(`--request ${req.method.toUpperCase()}`);
+
+      // Add all headers (skip host as it's in the URL)
+      Object.keys(req.headers).forEach(key => {
+        if (
+          key.toLowerCase() === 'host' ||
+          key.toLowerCase() === 'content-length'
+        ) {
+          return; // Skip host and content-length
+        }
+        const value = req.headers[key];
+        if (value) {
+          const headerValue = Array.isArray(value) ? value[0] : value;
+          if (headerValue) {
+            // Escape single quotes in header values
+            const escapedValue = headerValue.replace(/'/g, "'\\''");
+            curlParts.push(`--header '${key}: ${escapedValue}'`);
+          }
+        }
+      });
+
+      // Add body
+      if (bodyString && bodyString.length > 0) {
+        // Check if it's JSON
+        const isJson =
+          req.headers['content-type']?.includes('application/json');
+        if (isJson) {
+          // For JSON, format as single line for curl (Postman compatible)
+          try {
+            const parsed = JSON.parse(bodyString);
+            const jsonString = JSON.stringify(parsed);
+            // Escape single quotes for shell: ' becomes '\''
+            const escaped = jsonString.replace(/'/g, "'\\''");
+            curlParts.push(`--data-raw '${escaped}'`);
+          } catch {
+            // Not valid JSON, use as-is
+            const escaped = bodyString.replace(/'/g, "'\\''");
+            curlParts.push(`--data-raw '${escaped}'`);
+          }
+        } else {
+          // For non-JSON, escape properly
+          const escaped = bodyString.replace(/'/g, "'\\''");
+          curlParts.push(`--data-raw '${escaped}'`);
+        }
+      }
+
+      const curlCommand = curlParts.join(' \\\n');
+
+      // Save JSON file
+      const jsonFilePath = join(debugDir, jsonFilename);
+      await writeFile(
+        jsonFilePath,
+        JSON.stringify(requestData, null, 2),
+        'utf-8'
+      );
+
+      // Save curl command file
+      const curlFilePath = join(debugDir, curlFilename);
+      await writeFile(curlFilePath, `#!/bin/bash\n${curlCommand}\n`, 'utf-8');
+
+      console.log(`[Webhook] 💾 Saved debug request:`);
+      console.log(`  JSON: ${jsonFilePath}`);
+      console.log(`  CURL: ${curlFilePath}`);
+
+      // return res.status(200).json({
+      //   success: true,
+      //   message: 'Request saved successfully',
+      //   files: {
+      //     json: jsonFilename,
+      //     curl: curlFilename,
+      //   },
+      //   paths: {
+      //     json: jsonFilePath,
+      //     curl: curlFilePath,
+      //   },
+      //   curlCommand,
+      //   timestamp: requestData.timestamp,
+      // });
+
+      return res.status(200).json({});
+    } catch (err) {
+      console.error('[Webhook] ❌ Error saving debug request:', err);
+      return res.status(500).json({
+        error: 'Internal server error',
+        message: err instanceof Error ? err.message : 'Unknown error',
+      });
+    }
+  }
+);
+
+export default router;

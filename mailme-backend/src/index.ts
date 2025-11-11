@@ -2,7 +2,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { createApp } from './app';
-import { startSmtpServer } from './smtp';
 import { startCleanupJob } from './cleanup';
 import { prisma } from './prisma';
 
@@ -15,7 +14,6 @@ async function start() {
     console.log(`HTTP API listening on ${port}`);
   });
 
-  startSmtpServer();
   startCleanupJob();
 
   // close Prisma on shutdown
