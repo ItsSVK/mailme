@@ -123,10 +123,10 @@ const Mailbox = () => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-background">
+    <div className="flex flex-col min-h-screen bg-linear-to-br from-background">
       <Header showEmail tempEmail={tempEmail} />
 
-      <main className="container mx-auto px-4 py-6 pb-32">
+      <main className="flex-1 container mx-auto px-4 py-6">
         <Card className="p-4 mb-6 flex flex-row items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="flex-1 min-w-0">
