@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { ArrowRight, Shield, Clock, Zap } from 'lucide-react';
 import heroImage from '@/assets/hero-email.jpg';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { useCreateMailbox } from '@/hooks/useMailbox';
 
 const Home = () => {
@@ -37,7 +38,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-linear-to-br from-background to-secondary">
       <Header />
-      <main className="container mx-auto px-4 py-12">
+      <main className="container mx-auto px-4 py-12 pb-32">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
             <div className="space-y-6">
@@ -162,6 +163,7 @@ const Home = () => {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

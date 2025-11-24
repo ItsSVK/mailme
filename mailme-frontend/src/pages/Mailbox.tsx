@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Check, Copy, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useEmails } from '@/hooks/useMailbox';
+import Footer from '@/components/Footer';
 import type { Email as ApiEmail } from '@/lib/api';
 
 // Helper to format timestamp
@@ -125,7 +126,7 @@ const Mailbox = () => {
     <div className="min-h-screen bg-linear-to-br from-background">
       <Header showEmail tempEmail={tempEmail} />
 
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-6 pb-32">
         <Card className="p-4 mb-6 flex flex-row items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="flex-1 min-w-0">
@@ -199,6 +200,7 @@ const Mailbox = () => {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };
