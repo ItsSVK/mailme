@@ -2,7 +2,7 @@ import { Heart } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="fixed bottom-0 left-0 right-0 w-full py-8 border-t border-border bg-background/95 backdrop-blur-sm z-50">
+    <footer className="w-full py-6 border-t border-border bg-background/95 backdrop-blur-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-center gap-2 text-muted-foreground">
           <span className="text-sm">Crafted with care by</span>

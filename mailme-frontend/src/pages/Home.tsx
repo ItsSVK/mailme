@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { ArrowRight, Shield, Clock, Zap } from 'lucide-react';
-import heroImage from '@/assets/hero-email.jpg';
+import { ArrowRight, Shield, Clock, Zap, Mail } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useCreateMailbox } from '@/hooks/useMailbox';
@@ -36,133 +35,129 @@ const Home = () => {
   }, [username]);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-background to-secondary">
+    <div className="flex flex-col min-h-screen bg-linear-to-br from-background to-secondary overflow-hidden">
       <Header />
-      <main className="container mx-auto px-4 py-12 pb-32">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
-            <div className="space-y-6">
-              <h2 className="text-5xl font-bold text-foreground leading-tight">
-                Temporary mail
-                <span className="block text-primary">with zero trace</span>
-              </h2>
-
-              <p className="text-lg text-muted-foreground">
-                Protect your real email address from spam, advertising, and
-                malware with our instant temporary email service.
-              </p>
-
-              <Card className="p-6 shadow-lg">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label
-                      htmlFor="username"
-                      className="block text-sm font-medium text-foreground mb-2"
-                    >
-                      Choose your username
-                    </label>
-                    <Input
-                      id="username"
-                      type="text"
-                      placeholder="yourname"
-                      value={username}
-                      onChange={e => setUsername(e.target.value)}
-                      className="text-lg h-12 dark:bg-slate-900"
-                      required
-                      autoComplete="off"
-                    />
-                    {(username.length < 3 &&
-                      (username.length == 0 ? (
-                        <p className="text-sm text-muted-foreground mt-2">
-                          Your email:{' '}
-                          <span className="font-medium text-foreground">
-                            {username || 'yourname'}@
-                            {import.meta.env.VITE_DOMAIN || 'mailme.local'}
-                          </span>
-                        </p>
-                      ) : (
-                        <p className="text-sm dark:text-yellow-500 text-orange-500 mt-2">
-                          Username must be at least 3 characters long
-                        </p>
-                      ))) ||
-                      (username.length >= 3 && !isValidUsername ? (
-                        <p className="text-sm text-red-500 mt-2">
-                          The username can not be used
-                        </p>
-                      ) : (
-                        <p className="text-sm text-muted-foreground mt-2">
-                          Your email:{' '}
-                          <span className="font-medium dark:text-green-500 text-blue-500">
-                            {username || 'yourname'}@
-                            {import.meta.env.VITE_DOMAIN || 'mailme.local'}
-                          </span>
-                        </p>
-                      ))}
-                  </div>
-
-                  <Button
-                    type="submit"
-                    size="lg"
-                    className="w-full h-12 text-base bg-linear-to-r from-primary to-primary-glow hover:opacity-90 transition-opacity cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
-                    disabled={!isValidUsername || isPending}
-                  >
-                    {isPending ? 'Creating...' : 'Check Mailbox'}
-                    <ArrowRight className="ml-2 w-5 h-5" />
-                  </Button>
-                </form>
-              </Card>
-            </div>
-
-            <div className="relative">
-              <img
-                src={heroImage}
-                alt="Temporary Email Service"
-                className="rounded-2xl shadow-2xl w-full"
-              />
-            </div>
+      
+      {/* Main Content - Centered */}
+      <main className="flex-1 flex items-center justify-center px-4 py-6">
+        <div className="w-full max-w-2xl">
+          {/* Animated floating email icons background */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-10">
+            <Mail className="absolute top-20 left-10 w-8 h-8 text-primary animate-float" style={{ animationDelay: '0s' }} />
+            <Mail className="absolute top-40 right-20 w-6 h-6 text-primary animate-float" style={{ animationDelay: '1s' }} />
+            <Mail className="absolute bottom-32 left-1/4 w-10 h-10 text-primary animate-float" style={{ animationDelay: '2s' }} />
+            <Mail className="absolute bottom-20 right-1/3 w-7 h-7 text-primary animate-float" style={{ animationDelay: '1.5s' }} />
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="p-6 text-center hover:shadow-lg transition-shadow">
-              <div className="w-14 h-14 rounded-full bg-linear-to-br from-primary to-primary-glow flex items-center justify-center mx-auto mb-4">
-                <Zap className="w-7 h-7 text-primary-foreground" />
-              </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">
-                Instant Setup
-              </h3>
-              <p className="text-muted-foreground">
-                Get your temporary email address instantly. No registration
-                required.
-              </p>
-            </Card>
+          {/* Hero Section */}
+          <div className="text-center mb-8 animate-fade-in">
+            <h1 className="text-5xl md:text-6xl font-bold text-foreground leading-tight mb-3">
+              Temporary mail
+              <span className="block text-transparent bg-clip-text bg-linear-to-r from-primary to-primary-glow animate-gradient">
+                with zero trace
+              </span>
+            </h1>
+            <p className="text-base text-muted-foreground max-w-xl mx-auto">
+              Protect your real email address from spam, advertising, and malware
+            </p>
+          </div>
 
-            <Card className="p-6 text-center hover:shadow-lg transition-shadow">
-              <div className="w-14 h-14 rounded-full bg-linear-to-br from-primary to-primary-glow flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-7 h-7 text-primary-foreground" />
+          {/* Form Card */}
+          <Card className="p-6 shadow-2xl backdrop-blur-sm bg-card/80 border-2 border-primary/10 animate-slide-up">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="username"
+                  className="block text-sm font-medium text-foreground mb-2"
+                >
+                  Choose your username
+                </label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="yourname"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  className="text-base h-11 dark:bg-slate-900 transition-all duration-200 focus:scale-[1.02]"
+                  required
+                  autoComplete="off"
+                />
+                {(username.length < 3 &&
+                  (username.length == 0 ? (
+                    <p className="text-sm text-muted-foreground mt-2 transition-all">
+                      Your email:{' '}
+                      <span className="font-medium text-foreground">
+                        {username || 'yourname'}@
+                        {import.meta.env.VITE_DOMAIN || 'mailme.local'}
+                      </span>
+                    </p>
+                  ) : (
+                    <p className="text-sm dark:text-yellow-500 text-orange-500 mt-2 animate-shake">
+                      Username must be at least 3 characters long
+                    </p>
+                  ))) ||
+                  (username.length >= 3 && !isValidUsername ? (
+                    <p className="text-sm text-red-500 mt-2 animate-shake">
+                      The username can not be used
+                    </p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground mt-2 transition-all">
+                      Your email:{' '}
+                      <span className="font-medium dark:text-green-500 text-blue-500 animate-pulse">
+                        {username || 'yourname'}@
+                        {import.meta.env.VITE_DOMAIN || 'mailme.local'}
+                      </span>
+                    </p>
+                  ))}
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">
-                Privacy First
-              </h3>
-              <p className="text-muted-foreground">
-                Protect your real email from spam and unwanted messages.
-              </p>
-            </Card>
 
-            <Card className="p-6 text-center hover:shadow-lg transition-shadow">
-              <div className="w-14 h-14 rounded-full bg-linear-to-br from-primary to-primary-glow flex items-center justify-center mx-auto mb-4">
-                <Clock className="w-7 h-7 text-primary-foreground" />
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full h-11 text-base bg-linear-to-r from-primary to-primary-glow hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 shadow-lg hover:shadow-xl"
+                disabled={!isValidUsername || isPending}
+              >
+                {isPending ? 'Creating...' : 'Check Mailbox'}
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </form>
+          </Card>
+
+          {/* Feature Badges - Compact horizontal layout */}
+          <div className="grid grid-cols-3 gap-3 mt-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+            <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:scale-105 group">
+              <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-primary-glow flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                <Zap className="w-5 h-5 text-primary-foreground" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">
-                Auto-Expires
-              </h3>
-              <p className="text-muted-foreground">
-                Messages are automatically deleted after 24 hours for your
-                security.
-              </p>
-            </Card>
+              <div className="text-center">
+                <h3 className="text-xs font-semibold text-foreground">Instant</h3>
+                <p className="text-xs text-muted-foreground">No signup</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:scale-105 group">
+              <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-primary-glow flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                <Shield className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <div className="text-center">
+                <h3 className="text-xs font-semibold text-foreground">Private</h3>
+                <p className="text-xs text-muted-foreground">Zero trace</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:scale-105 group">
+              <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-primary-glow flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                <Clock className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <div className="text-center">
+                <h3 className="text-xs font-semibold text-foreground">Secure</h3>
+                <p className="text-xs text-muted-foreground">Auto-delete after 24 hours</p>
+              </div>
+            </div>
           </div>
         </div>
       </main>
+
       <Footer />
     </div>
   );
