@@ -1,0 +1,12 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Disallow private/temporary mailbox pages
+Disallow: /mailbox
+
+# Sitemap
+Sitemap: https://mailme.itssvk.dev/sitemap.xml
+
+# Crawl-delay (optional, in seconds)
+Crawl-delay: 1

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Homepage -->
+  <url>
+    <loc>https://mailme.itssvk.dev/</loc>
+    <lastmod>2025-11-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://mailme.itssvk.dev/og-image.png</image:loc>
+      <image:title>MailMe - Temporary Email with Zero Trace</image:title>
+    </image:image>
+  </url>
+  
+  <!-- Mailbox Page (Generic - not indexed due to robots.txt) -->
+  <url>
+    <loc>https://mailme.itssvk.dev/mailbox</loc>
+    <lastmod>2025-11-27</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+</urlset>

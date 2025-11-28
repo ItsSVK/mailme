@@ -9,6 +9,7 @@ import { Check, Copy, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useEmails } from '@/hooks/useMailbox';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 import type { Email as ApiEmail } from '@/lib/api';
 
 // Helper to format timestamp
@@ -124,6 +125,12 @@ const Mailbox = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-linear-to-br from-background">
+      <SEO
+        title="Your Mailbox - MailMe"
+        description="View your temporary email inbox. Secure, private, and auto-deletes after 24 hours."
+        url="https://mailme.itssvk.dev/mailbox"
+        noindex={true}
+      />
       <Header showEmail tempEmail={tempEmail} />
 
       <main className="flex-1 container mx-auto px-4 py-6">
