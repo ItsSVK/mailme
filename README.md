@@ -2,6 +2,16 @@
 
 A modern, privacy-focused temporary email service that allows users to create instant disposable email addresses. Built with React, Express, Bun, and Cloudflare Email Routing.
 
+## Preview
+
+<div align="center">
+  <img src="mailme-frontend/public/mailme-home.png" alt="MailMe Homepage" width="800"/>
+  <p><em>Homepage - Create temporary email addresses instantly</em></p>
+  
+  <img src="mailme-frontend/public/mailme-mailbox.png" alt="MailMe Mailbox" width="800"/>
+  <p><em>Mailbox - View and manage your temporary emails</em></p>
+</div>
+
 ## Features
 
 - 🚀 **Instant Setup** - Create temporary email addresses instantly, no registration required
@@ -86,6 +96,12 @@ mailme/
 ```
 
 For detailed setup, API documentation, and deployment instructions, see the README files in `mailme-backend/` and `mailme-frontend/`.
+
+## ⭐ Star this Repo
+
+If you find this project useful, please consider giving it a star on GitHub! It helps others discover the project and shows your support.
+
+[![Star on GitHub](https://img.shields.io/github/stars/Itssvk/mailme?style=social)](https://github.com/Itssvk/mailme)
 
 ## License
 

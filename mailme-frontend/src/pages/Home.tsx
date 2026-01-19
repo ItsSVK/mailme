@@ -4,8 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { ArrowRight, Shield, Clock, Zap, Mail } from 'lucide-react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
 import { useCreateMailbox } from '@/hooks/useMailbox';
 
@@ -36,16 +34,14 @@ const Home = () => {
   }, [username]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-linear-to-br from-background to-secondary overflow-hidden">
+    <div className="flex flex-col flex-1 bg-linear-to-br from-background to-secondary overflow-hidden">
       <SEO
         title="MailMe - Temporary Email with Zero Trace | Disposable Email Service"
         description="Create instant disposable email addresses with MailMe. Protect your real email from spam, advertising, and malware. No signup required, auto-deletes after 24 hours. Privacy-focused temporary email service."
         keywords="temporary email, disposable email, temp mail, fake email, throwaway email, privacy email, spam protection, anonymous email, burner email, temporary inbox"
         url="https://mailme.itssvk.dev/"
         canonical="https://mailme.itssvk.dev/"
-      />
-      <Header />
-      
+      />      
       {/* Main Content - Centered */}
       <main className="flex-1 flex items-center justify-center px-4 py-6">
         <div className="w-full max-w-2xl">
@@ -165,8 +161,6 @@ const Home = () => {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

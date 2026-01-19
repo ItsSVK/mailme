@@ -7,6 +7,8 @@ import Mailbox from '@/pages/Mailbox';
 import NotFound from '@/pages/NotFound';
 import Home from '@/pages/Home';
 import { Analytics } from '@vercel/analytics/react';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 const queryClient = new QueryClient();
 
@@ -16,11 +18,17 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/mailbox" element={<Mailbox />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-1 flex flex-col">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/mailbox" element={<Mailbox />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
         </BrowserRouter>
         <Analytics />
       </TooltipProvider>

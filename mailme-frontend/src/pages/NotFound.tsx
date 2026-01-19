@@ -5,7 +5,7 @@ import SEO from '@/components/SEO';
 const NotFound = () => {
   const navigate = useNavigate();
   return (
-    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-background to-secondary">
+    <div className="flex flex-1 w-full items-center justify-center bg-linear-to-br from-background to-secondary">
       <SEO
         title="Page Not Found - MailMe"
         description="The page you are looking for does not exist."

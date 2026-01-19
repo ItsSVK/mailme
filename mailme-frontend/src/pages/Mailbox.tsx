@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '@/components/Header';
 import EmailList, { Email } from '@/components/EmailList';
 import EmailView from '@/components/EmailView';
 import { Card } from '@/components/ui/card';
@@ -8,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Check, Copy, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useEmails } from '@/hooks/useMailbox';
-import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
 import type { Email as ApiEmail } from '@/lib/api';
 
@@ -124,14 +122,13 @@ const Mailbox = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-linear-to-br from-background">
+    <div className="flex flex-col flex-1 bg-linear-to-br from-background">
       <SEO
         title="Your Mailbox - MailMe"
         description="View your temporary email inbox. Secure, private, and auto-deletes after 24 hours."
         url="https://mailme.itssvk.dev/mailbox"
         noindex={true}
       />
-      <Header showEmail tempEmail={tempEmail} />
 
       <main className="flex-1 container mx-auto px-4 py-6">
         <Card className="p-4 mb-6 flex flex-row items-center justify-between flex-wrap gap-4">
@@ -207,7 +204,6 @@ const Mailbox = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

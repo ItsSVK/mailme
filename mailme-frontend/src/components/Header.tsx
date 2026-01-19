@@ -1,13 +1,9 @@
-import { Mail } from 'lucide-react';
+import { Mail, Star } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
-interface HeaderProps {
-  showEmail?: boolean;
-  tempEmail?: string;
-}
-
-const Header = ({ showEmail, tempEmail }: HeaderProps) => {
+const Header = () => {
   const navigate = useNavigate();
   return (
     <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
@@ -25,14 +21,25 @@ const Header = ({ showEmail, tempEmail }: HeaderProps) => {
         </div>
 
         <div className="flex items-center gap-3">
-          {showEmail && tempEmail && (
-            <div className="hidden md:flex items-center gap-2 bg-secondary px-4 py-2 rounded-lg">
-              <Mail className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground">
-                {tempEmail}
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className="relative cursor-pointer"
+          >
+            <a
+              href="https://github.com/Itssvk/mailme"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Star on GitHub"
+              className="flex items-center gap-2"
+            >
+              <Star className="h-4 w-4 fill-yellow-400 stroke-yellow-400 dark:fill-yellow-500 dark:stroke-yellow-500 transition-all hover:fill-yellow-500 hover:stroke-yellow-500 dark:hover:fill-yellow-400 dark:hover:stroke-yellow-400" />
+              <span className="hidden sm:inline text-sm font-medium">
+                Star on GitHub
               </span>
-            </div>
-          )}
+            </a>
+          </Button>
           <ThemeToggle />
         </div>
       </div>
