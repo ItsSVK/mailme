@@ -12,7 +12,7 @@ import type { Email as ApiEmail } from '@/lib/api';
 
 // Helper to format timestamp
 function formatTimestamp(dateString: string): string {
-  const date = new Date(dateString);
+  const date = new Date(dateString.replace(" ", "T") + "Z");
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffMins = Math.floor(diffMs / 60000);
