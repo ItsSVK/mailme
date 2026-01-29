@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+  import.meta.env.VITE_API_URL || 'https://mailme-email-worker.connectshouvik.workers.dev/api';
 
 export interface Mailbox {
   username: string;
@@ -12,6 +12,7 @@ export interface Email {
   to: string;
   from: string;
   subject: string | null;
+  snippet: string | null;
   text: string | null;
   html: string | null;
   createdAt: string;
@@ -53,14 +54,9 @@ export async function createMailbox(
  * Fetch emails for a username
  */
 export async function fetchEmails(
-  username: string,
-  since?: string
+  username: string
 ): Promise<Email[]> {
   const url = new URL(`${API_BASE_URL}/mails/${username}`);
-  if (since) {
-    url.searchParams.set('since', since);
-  }
-
   const response = await fetch(url.toString());
 
   if (!response.ok) {
@@ -72,6 +68,28 @@ export async function fetchEmails(
       .catch(() => ({ error: 'Unknown error' }));
     throw new Error(
       error.error || `Failed to fetch emails: ${response.statusText}`
+    );
+  }
+
+  return response.json();
+}
+
+/**
+ * Fetch full email details
+ */
+export async function fetchEmailDetails(
+  username: string,
+  emailId: string
+): Promise<Email> {
+  const url = new URL(`${API_BASE_URL}/mails/${username}/${emailId}`);
+  const response = await fetch(url.toString());
+
+  if (!response.ok) {
+    const error = await response
+      .json()
+      .catch(() => ({ error: 'Unknown error' }));
+    throw new Error(
+      error.error || `Failed to fetch email details: ${response.statusText}`
     );
   }
 
