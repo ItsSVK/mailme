@@ -1,0 +1,15 @@
+name = "mailme-email-worker"
+main = "worker.ts"
+compatibility_date = "2025-01-01"
+
+[vars]
+DOMAIN = "mailme.itssvk.dev"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "mailme-db"
+database_id = "2233844a-419f-4c14-9853-952542ae477e"
+
+[[kv_namespaces]]
+binding = "EMAILS_KV"
+id = "f579bfb5e96a465ea94cb3b257a09577"

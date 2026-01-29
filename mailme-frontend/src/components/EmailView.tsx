@@ -1,5 +1,5 @@
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, Mail } from 'lucide-react';
+import { ArrowLeft, Mail, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface EmailViewProps {
@@ -10,10 +10,22 @@ interface EmailViewProps {
     timestamp: string;
     html?: string | null;
   } | null;
+  isLoading?: boolean;
   onBack?: () => void;
 }
 
-const EmailView = ({ email, onBack }: EmailViewProps) => {
+const EmailView = ({ email, isLoading, onBack }: EmailViewProps) => {
+  if (isLoading) {
+    return (
+      <Card className="p-8 h-full flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground italic">Fetching email content...</p>
+        </div>
+      </Card>
+    );
+  }
+
   if (!email) {
     return (
       <Card className="p-8 h-full flex items-center justify-center">

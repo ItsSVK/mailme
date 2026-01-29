@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check, Copy, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
-import { useEmails } from '@/hooks/useMailbox';
+import { useEmails, useEmailDetails } from '@/hooks/useMailbox';
 import SEO from '@/components/SEO';
 import type { Email as ApiEmail } from '@/lib/api';
 
@@ -28,7 +28,7 @@ function formatTimestamp(dateString: string): string {
 
 // Convert API email to component email format
 function convertEmail(apiEmail: ApiEmail): Email {
-  const preview = apiEmail.text || apiEmail.html || 'No content';
+  const preview = apiEmail.snippet || apiEmail.text || apiEmail.html || 'No content';
   // Strip HTML tags for preview
   const textPreview = preview.replace(/<[^>]*>/g, '').substring(0, 100);
 
@@ -71,6 +71,12 @@ const Mailbox = () => {
     refetchInterval: 15000, // Poll every 15 seconds
   });
 
+  // Fetch details for the selected email
+  const {
+    data: selectedEmailData,
+    isLoading: isDetailsLoading
+  } = useEmailDetails(username || undefined, selectedEmailId);
+
   // Convert API emails to component format and mark read status
   const emails = useMemo(() => {
     return apiEmails.map(convertEmail).map(email => ({
@@ -83,19 +89,16 @@ const Mailbox = () => {
     ? `${username}@${import.meta.env.VITE_DOMAIN || 'mailme.local'}`
     : '';
 
-  const selectedEmail = selectedEmailId
-    ? (() => {
-        const apiEmail = apiEmails.find(e => e.id === selectedEmailId);
-        if (!apiEmail) return null;
-        return {
-          from: apiEmail.from,
-          subject: apiEmail.subject || '(no subject)',
-          content: apiEmail.html || apiEmail.text || 'No content available',
-          timestamp: formatTimestamp(apiEmail.createdAt),
-          html: apiEmail.html,
-        };
-      })()
-    : null;
+  const selectedEmail = useMemo(() => {
+    if (!selectedEmailId || !selectedEmailData) return null;
+    return {
+      from: selectedEmailData.from,
+      subject: selectedEmailData.subject || '(no subject)',
+      content: selectedEmailData.html || selectedEmailData.text || 'No content available',
+      timestamp: formatTimestamp(selectedEmailData.createdAt),
+      html: selectedEmailData.html,
+    };
+  }, [selectedEmailId, selectedEmailData]);
 
   const handleCopyEmail = async () => {
     await navigator.clipboard.writeText(tempEmail);
@@ -175,9 +178,8 @@ const Mailbox = () => {
 
         <div className="grid lg:grid-cols-5 gap-6">
           <div
-            className={`lg:col-span-2 ${
-              selectedEmailId ? 'hidden lg:block' : ''
-            }`}
+            className={`lg:col-span-2 ${selectedEmailId ? 'hidden lg:block' : ''
+              }`}
           >
             {isLoading ? (
               <Card className="p-8 text-center">
@@ -193,12 +195,12 @@ const Mailbox = () => {
           </div>
 
           <div
-            className={`lg:col-span-3 ${
-              !selectedEmailId ? 'hidden lg:block' : ''
-            }`}
+            className={`lg:col-span-3 ${!selectedEmailId ? 'hidden lg:block' : ''
+              }`}
           >
             <EmailView
               email={selectedEmail}
+              isLoading={isDetailsLoading}
               onBack={() => setSelectedEmailId(undefined)}
             />
           </div>

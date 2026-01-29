@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createMailbox, fetchEmails } from '@/lib/api';
+import { createMailbox, fetchEmails, fetchEmailDetails } from '@/lib/api';
 import { toast } from 'sonner';
 
 /**
@@ -40,16 +40,33 @@ export function useEmails(
 }
 
 /**
+ * Hook to fetch full email details
+ */
+export function useEmailDetails(
+  username: string | undefined,
+  emailId: string | undefined
+) {
+  return useQuery({
+    queryKey: ['email', username, emailId],
+    queryFn: () => fetchEmailDetails(username!, emailId!),
+    enabled: !!username && !!emailId,
+    refetchOnWindowFocus: false, // Email content usually doesn't change
+    staleTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
+  });
+}
+
+/**
  * Hook to fetch emails since a specific date
+ * @deprecated The new worker backend handles 24h retention automatically.
  */
 export function useEmailsSince(
   username: string | undefined,
-  since: string | undefined
+  _since: string | undefined
 ) {
   return useQuery({
-    queryKey: ['emails', username, 'since', since],
-    queryFn: () => fetchEmails(username!, since),
-    enabled: !!username && !!since,
+    queryKey: ['emails', username],
+    queryFn: () => fetchEmails(username!),
+    enabled: !!username,
     refetchOnWindowFocus: true,
   });
 }
