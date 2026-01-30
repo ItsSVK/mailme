@@ -24,7 +24,7 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 function getSystemPreference(): 'light' | 'dark' {
   if (typeof window === 'undefined') return 'light';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
+  return matchMedia('(prefers-color-scheme: dark)').matches
     ? 'dark'
     : 'light';
 }
@@ -36,7 +36,7 @@ export function ThemeProvider({
 }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window === 'undefined') return defaultTheme;
-    const stored = window.localStorage.getItem(storageKey) as Theme | null;
+    const stored = localStorage.getItem(storageKey) as Theme | null;
     return stored ?? defaultTheme;
   });
 
@@ -44,12 +44,12 @@ export function ThemeProvider({
     const root = document.documentElement; // <html>
     const effective = theme === 'system' ? getSystemPreference() : theme;
     root.classList.toggle('dark', effective === 'dark');
-    window.localStorage.setItem(storageKey, theme);
+    localStorage.setItem(storageKey, theme);
   }, [theme, storageKey]);
 
   useEffect(() => {
     if (theme !== 'system') return;
-    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const media = matchMedia('(prefers-color-scheme: dark)');
     const handler = () => {
       const root = document.documentElement;
       root.classList.toggle('dark', media.matches);

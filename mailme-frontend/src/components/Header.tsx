@@ -1,10 +1,16 @@
-import { Mail, Star } from 'lucide-react';
+import { Mail, Star, LogOut } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 const Header = () => {
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('mailboxUsername')
+    navigate('/');
+  };
+
   return (
     <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
@@ -24,23 +30,24 @@ const Header = () => {
           <Button
             variant="outline"
             size="sm"
-            asChild
             className="relative cursor-pointer"
+            onClick={() => window.open('https://github.com/Itssvk/mailme', '_blank')}
           >
-            <a
-              href="https://github.com/Itssvk/mailme"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Star on GitHub"
-              className="flex items-center gap-2"
-            >
-              <Star className="h-4 w-4 fill-yellow-400 stroke-yellow-400 dark:fill-yellow-500 dark:stroke-yellow-500 transition-all hover:fill-yellow-500 hover:stroke-yellow-500 dark:hover:fill-yellow-400 dark:hover:stroke-yellow-400" />
-              <span className="hidden sm:inline text-sm font-medium">
-                Star on GitHub
-              </span>
-            </a>
+            <Star className="h-4 w-4 fill-yellow-400 stroke-yellow-400 dark:fill-yellow-500 dark:stroke-yellow-500 transition-all hover:fill-yellow-500 hover:stroke-yellow-500 dark:hover:fill-yellow-400 dark:hover:stroke-yellow-400" />
+            <span className="hidden sm:inline text-sm font-medium">
+              Star on GitHub
+            </span>
           </Button>
           <ThemeToggle />
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleLogout}
+            className="relative cursor-pointer"
+          >
+            <LogOut className="absolute h-5 w-5 scale-100 transition-all dark:scale-100" />
+            <span className="sr-only">Logout</span>
+          </Button>
         </div>
       </div>
     </header>
