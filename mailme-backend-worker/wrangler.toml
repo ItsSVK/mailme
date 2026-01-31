@@ -13,3 +13,6 @@ database_id = "2233844a-419f-4c14-9853-952542ae477e"
 [[kv_namespaces]]
 binding = "EMAILS_KV"
 id = "f579bfb5e96a465ea94cb3b257a09577"
+
+[triggers]
+crons = ["0 * * * *"]

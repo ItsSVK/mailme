@@ -160,5 +160,19 @@ export default {
     } catch (err) {
       console.error('[Worker] Error processing email:', err);
     }
+  },
+
+  async scheduled(event: any, env: Env, ctx: ExecutionContext): Promise<void> {
+    console.log('[Worker] Running scheduled cleanup...');
+    try {
+      // Delete emails older than 24 hours
+      const result = await env.DB.prepare(
+        "DELETE FROM emails WHERE created_at < datetime('now', '-24 hours')"
+      ).run();
+      
+      console.log(`[Worker] Cleanup complete. Deleted ${result.meta.changes} old emails.`);
+    } catch (err) {
+      console.error('[Worker] Cleanup failed:', err);
+    }
   }
 };
