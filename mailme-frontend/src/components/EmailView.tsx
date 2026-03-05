@@ -24,6 +24,7 @@ const EmailView = ({ email, isLoading, onBack }: EmailViewProps) => {
     const height = iframe.contentDocument.documentElement.scrollHeight;
     iframe.style.height = `${height}px`;
   }, []);
+
   if (isLoading) {
     return (
       <Card className="p-8 h-full flex items-center justify-center">
@@ -82,7 +83,7 @@ const EmailView = ({ email, isLoading, onBack }: EmailViewProps) => {
           <iframe
             ref={iframeRef}
             srcDoc={email.html}
-            sandbox="allow-popups allow-popups-to-escape-sandbox"
+            sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"
             title="Email content"
             onLoad={handleIframeLoad}
             className="w-full border-0 rounded"
