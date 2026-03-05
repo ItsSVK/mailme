@@ -92,6 +92,7 @@ const Mailbox = () => {
   const selectedEmail = useMemo(() => {
     if (!selectedEmailId || !selectedEmailData) return null;
     return {
+      id: selectedEmailId,
       from: selectedEmailData.from,
       subject: selectedEmailData.subject || '(no subject)',
       content: selectedEmailData.html || selectedEmailData.text || 'No content available',

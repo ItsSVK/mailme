@@ -1,10 +1,11 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { ArrowLeft, Mail, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface EmailViewProps {
   email: {
+    id?: string;
     from: string;
     subject: string;
     content: string;
@@ -17,12 +18,46 @@ interface EmailViewProps {
 
 const EmailView = ({ email, isLoading, onBack }: EmailViewProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [isIframeLoaded, setIsIframeLoaded] = useState(false);
+
+  // Reset iframe loaded state whenever the selected email changes
+  useEffect(() => {
+    if (email?.html) {
+      setIsIframeLoaded(false);
+    }
+  }, [email?.id, email?.html]);
 
   const handleIframeLoad = useCallback(() => {
     const iframe = iframeRef.current;
-    if (!iframe?.contentDocument?.documentElement) return;
-    const height = iframe.contentDocument.documentElement.scrollHeight;
+    const doc = iframe?.contentDocument;
+    if (!iframe || !doc?.documentElement) return;
+
+    // Inject styles that strip default body margin and hide any scrollbars
+    // that the email's own HTML might trigger inside the iframe.
+    const style = doc.createElement('style');
+    style.textContent = `
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow-x: hidden !important;
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+      html::-webkit-scrollbar,
+      body::-webkit-scrollbar {
+        display: none !important;
+      }
+    `;
+    (doc.head ?? doc.documentElement).appendChild(style);
+
+    // Take the max of both scrollHeight values — email templates vary in which
+    // element carries the full content height.
+    const height = Math.max(
+      doc.documentElement.scrollHeight,
+      doc.body?.scrollHeight ?? 0,
+    );
     iframe.style.height = `${height}px`;
+    setIsIframeLoaded(true);
   }, []);
 
   if (isLoading) {
@@ -80,15 +115,33 @@ const EmailView = ({ email, isLoading, onBack }: EmailViewProps) => {
 
       <div className="flex-1 overflow-auto">
         {email.html ? (
-          <iframe
-            ref={iframeRef}
-            srcDoc={email.html}
-            sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-            title="Email content"
-            onLoad={handleIframeLoad}
-            className="w-full border-0 rounded"
-            style={{ colorScheme: 'light', height: 0 }}
-          />
+          <>
+            {/* Spinner shown until iframe onLoad fires */}
+            {!isIframeLoaded && (
+              <div className="flex items-center justify-center py-16">
+                <div className="text-center">
+                  <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground italic">Loading email body...</p>
+                </div>
+              </div>
+            )}
+            <iframe
+              key={email.id ?? email.html}
+              ref={iframeRef}
+              srcDoc={email.html}
+              sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+              title="Email content"
+              onLoad={handleIframeLoad}
+              className="w-full border-0 rounded"
+              style={{
+                colorScheme: 'light',
+                height: 0,
+                // Keep iframe in the DOM but invisible until loaded so onLoad fires
+                visibility: isIframeLoaded ? 'visible' : 'hidden',
+                overflow: 'hidden',
+              }}
+            />
+          </>
         ) : (
           <div className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap">
             {email.content}
