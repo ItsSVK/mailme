@@ -1,3 +1,4 @@
+import { useCallback, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { ArrowLeft, Mail, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,14 @@ interface EmailViewProps {
 }
 
 const EmailView = ({ email, isLoading, onBack }: EmailViewProps) => {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  const handleIframeLoad = useCallback(() => {
+    const iframe = iframeRef.current;
+    if (!iframe?.contentDocument?.documentElement) return;
+    const height = iframe.contentDocument.documentElement.scrollHeight;
+    iframe.style.height = `${height}px`;
+  }, []);
   if (isLoading) {
     return (
       <Card className="p-8 h-full flex items-center justify-center">
@@ -70,9 +79,14 @@ const EmailView = ({ email, isLoading, onBack }: EmailViewProps) => {
 
       <div className="flex-1 overflow-auto">
         {email.html ? (
-          <div
-            className="prose prose-sm max-w-none text-foreground"
-            dangerouslySetInnerHTML={{ __html: email.html }}
+          <iframe
+            ref={iframeRef}
+            srcDoc={email.html}
+            sandbox="allow-popups allow-popups-to-escape-sandbox"
+            title="Email content"
+            onLoad={handleIframeLoad}
+            className="w-full border-0 rounded"
+            style={{ colorScheme: 'light', height: 0 }}
           />
         ) : (
           <div className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap">
