@@ -4,7 +4,7 @@ import EmailList, { Email } from '@/components/EmailList';
 import EmailView from '@/components/EmailView';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check, Copy, RefreshCw } from 'lucide-react';
+import { Check, Copy, RefreshCw, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import { useEmails, useEmailDetails } from '@/hooks/useMailbox';
 import SEO from '@/components/SEO';
@@ -126,7 +126,7 @@ const Mailbox = () => {
   }
 
   return (
-    <div className="flex flex-col flex-1 bg-linear-to-br from-background">
+    <div className="flex flex-col flex-1 bg-background">
       <SEO
         title="Your Mailbox - MailMe"
         description="View your temporary email inbox. Secure, private, and auto-deletes after 24 hours."
@@ -135,10 +135,13 @@ const Mailbox = () => {
       />
 
       <main className="flex-1 container mx-auto px-4 py-6">
-        <Card className="p-4 mb-6 flex flex-row items-center justify-between flex-wrap gap-4">
+        <Card className="p-4 mb-6 flex flex-row items-center justify-between flex-wrap gap-4 animate-fade-in">
           <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-background neu-sm flex items-center justify-center shrink-0">
+              <Mail className="w-5 h-5 text-primary" />
+            </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-muted-foreground mb-1">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
                 Your temporary email
               </p>
               <p className="text-lg font-semibold text-foreground truncate">
@@ -153,21 +156,21 @@ const Mailbox = () => {
               size="sm"
               onClick={handleCopyEmail}
               disabled={copied}
-              className="cursor-pointer hover:opacity-90 transition-opacity"
+              className="cursor-pointer"
             >
               {copied ? (
-                <Check className="w-4 h-4 mr-2" />
+                <Check className="w-4 h-4 mr-2 text-primary" />
               ) : (
                 <Copy className="w-4 h-4 mr-2" />
               )}
-              Copy
+              {copied ? 'Copied' : 'Copy'}
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={handleRefresh}
               disabled={isFetching}
-              className="cursor-pointer hover:opacity-90 transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+              className="cursor-pointer disabled:cursor-not-allowed"
             >
               <RefreshCw
                 className={`w-4 h-4 mr-2 ${isFetching ? 'animate-spin' : ''}`}

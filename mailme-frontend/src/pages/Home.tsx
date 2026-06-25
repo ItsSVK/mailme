@@ -3,9 +3,47 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { ArrowRight, Shield, Clock, Zap, Mail } from 'lucide-react';
+import { ArrowRight, Shield, Clock, Zap, Mail, ChevronDown } from 'lucide-react';
 import SEO from '@/components/SEO';
 import { useCreateMailbox } from '@/hooks/useMailbox';
+
+const STEPS = [
+  {
+    title: 'Pick a username',
+    desc: 'Type any name and get an instant @mailme address — no signup, no password.',
+  },
+  {
+    title: 'Use it anywhere',
+    desc: 'Drop it into signups, free trials, downloads, or anywhere you would rather not give your real email.',
+  },
+  {
+    title: 'Read your mail',
+    desc: 'Incoming emails appear in your inbox in real time, then auto-delete after 24 hours.',
+  },
+];
+
+const FAQS = [
+  {
+    q: 'Is MailMe free to use?',
+    a: 'Yes. MailMe is completely free, with no signup, registration, or credit card required.',
+  },
+  {
+    q: 'How long do temporary emails last?',
+    a: 'Every email is automatically deleted 24 hours after it arrives, so nothing lingers on our servers.',
+  },
+  {
+    q: 'Do I need to create an account?',
+    a: 'No. Just choose a username and your disposable inbox is ready instantly.',
+  },
+  {
+    q: 'Can I reply to or send emails?',
+    a: 'MailMe is a receive-only inbox built for verifications and signups. You can read incoming mail, but not send or reply.',
+  },
+  {
+    q: 'Is it private and safe?',
+    a: 'MailMe keeps your real address hidden and auto-deletes every email after 24 hours. Keep in mind that inboxes are public and not password-protected — anyone who enters the same username can read that inbox. Pick a hard-to-guess username and never use MailMe for sensitive or personal mail.',
+  },
+];
 
 const Home = () => {
   const [username, setUsername] = useState('');
@@ -34,17 +72,16 @@ const Home = () => {
   }, [username]);
 
   return (
-    <div className="flex flex-col flex-1 bg-linear-to-br from-background to-secondary overflow-hidden">
+    <div className="flex flex-col flex-1 bg-background overflow-hidden">
       <SEO
-        title="MailMe - Temporary Email with Zero Trace | Disposable Email Service"
-        description="Create instant disposable email addresses with MailMe. Protect your real email from spam, advertising, and malware. No signup required, auto-deletes after 24 hours. Privacy-focused temporary email service."
-        keywords="temporary email, disposable email, temp mail, fake email, throwaway email, privacy email, spam protection, anonymous email, burner email, temporary inbox"
+        title="Free Temporary Email with Zero Trace | MailMe"
+        description="Create a free disposable email address instantly with MailMe. Protect your inbox from spam and keep your real email private — no signup, auto-deletes in 24h."
         url="https://mailme.itssvk.dev/"
         canonical="https://mailme.itssvk.dev/"
-      />      
-      {/* Main Content - Centered */}
-      <main className="flex-1 flex items-center justify-center px-4 py-6">
-        <div className="w-full max-w-2xl">
+      />
+      <main className="flex-1 flex flex-col items-center px-4 py-12 gap-24">
+        {/* Hero + form */}
+        <section className="relative w-full max-w-2xl pt-6">
           {/* Animated floating email icons background */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-10">
             <Mail className="absolute top-20 left-10 w-8 h-8 text-primary animate-float" style={{ animationDelay: '0s' }} />
@@ -56,8 +93,8 @@ const Home = () => {
           {/* Hero Section */}
           <div className="text-center mb-8 animate-fade-in">
             <h1 className="text-5xl md:text-6xl font-bold text-foreground leading-tight mb-3">
-              Temporary mail
-              <span className="block text-transparent bg-clip-text bg-linear-to-r from-primary to-primary-glow animate-gradient">
+              Temporary email
+              <span className="block text-primary">
                 with zero trace
               </span>
             </h1>
@@ -67,7 +104,7 @@ const Home = () => {
           </div>
 
           {/* Form Card */}
-          <Card className="p-6 shadow-2xl backdrop-blur-sm bg-card/80 border-2 border-primary/10 animate-slide-up">
+          <Card className="p-6 neu-lg animate-slide-up" style={{ animationDelay: '0.1s' }}>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label
@@ -82,7 +119,7 @@ const Home = () => {
                   placeholder="yourname"
                   value={username}
                   onChange={e => setUsername(e.target.value)}
-                  className="text-base h-11 dark:bg-slate-900 transition-all duration-200 focus:scale-[1.02]"
+                  className="text-base h-11 transition-all duration-200"
                   required
                   autoComplete="off"
                 />
@@ -118,7 +155,7 @@ const Home = () => {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full h-11 text-base bg-linear-to-r from-primary to-primary-glow hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 shadow-lg hover:shadow-xl"
+                className="w-full h-11 text-base cursor-pointer disabled:cursor-not-allowed"
                 disabled={!isValidUsername || isPending}
               >
                 {isPending ? 'Creating...' : 'Check Mailbox'}
@@ -128,38 +165,77 @@ const Home = () => {
           </Card>
 
           {/* Feature Badges - Compact horizontal layout */}
-          <div className="grid grid-cols-3 gap-3 mt-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:scale-105 group">
-              <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-primary-glow flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
-                <Zap className="w-5 h-5 text-primary-foreground" />
+          <div className="grid grid-cols-3 gap-3 mt-8">
+            {[
+              { Icon: Zap, title: 'Instant', desc: 'No signup' },
+              { Icon: Shield, title: 'Private', desc: 'Zero trace' },
+              { Icon: Clock, title: 'Secure', desc: 'Auto-delete after 24 hours' },
+            ].map(({ Icon, title, desc }, i) => (
+              <div
+                key={title}
+                className="flex flex-col items-center gap-3 p-4 rounded-xl bg-background neu-sm hover:neu-md transition-all duration-300 group animate-slide-up"
+                style={{ animationDelay: `${0.2 + i * 0.1}s` }}
+              >
+                <div className="w-11 h-11 rounded-full bg-primary shadow-brand flex items-center justify-center transition-all duration-300 group-hover:scale-105">
+                  <Icon className="w-5 h-5 text-primary-foreground transition-transform duration-300 group-hover:scale-110" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-xs font-semibold text-foreground">{title}</h3>
+                  <p className="text-xs text-muted-foreground">{desc}</p>
+                </div>
               </div>
-              <div className="text-center">
-                <h3 className="text-xs font-semibold text-foreground">Instant</h3>
-                <p className="text-xs text-muted-foreground">No signup</p>
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:scale-105 group">
-              <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-primary-glow flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
-                <Shield className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-xs font-semibold text-foreground">Private</h3>
-                <p className="text-xs text-muted-foreground">Zero trace</p>
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:scale-105 group">
-              <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-primary-glow flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
-                <Clock className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-xs font-semibold text-foreground">Secure</h3>
-                <p className="text-xs text-muted-foreground">Auto-delete after 24 hours</p>
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
+        </section>
+
+        {/* How it works */}
+        <section className="w-full max-w-4xl">
+          <h2 className="text-3xl font-bold text-foreground text-center mb-3">
+            How it works
+          </h2>
+          <p className="text-muted-foreground text-center mb-10 max-w-xl mx-auto">
+            A disposable inbox in three steps — no account, no waiting.
+          </p>
+          <div className="grid md:grid-cols-3 gap-6">
+            {STEPS.map((step, i) => (
+              <div
+                key={step.title}
+                className="p-6 rounded-xl bg-background neu-md flex flex-col items-center text-center"
+              >
+                <div className="w-12 h-12 rounded-full bg-primary shadow-brand flex items-center justify-center text-primary-foreground font-bold text-lg mb-4">
+                  {i + 1}
+                </div>
+                <h3 className="font-semibold text-foreground mb-2">{step.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {step.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="w-full max-w-3xl">
+          <h2 className="text-3xl font-bold text-foreground text-center mb-10">
+            Frequently asked questions
+          </h2>
+          <div className="space-y-3">
+            {FAQS.map(({ q, a }) => (
+              <details
+                key={q}
+                className="group rounded-xl bg-background neu-sm open:neu-md transition-all duration-200 overflow-hidden"
+              >
+                <summary className="flex items-center justify-between gap-4 cursor-pointer list-none p-5 font-semibold text-foreground">
+                  {q}
+                  <ChevronDown className="w-5 h-5 text-primary shrink-0 transition-transform duration-200 group-open:rotate-180" />
+                </summary>
+                <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
+                  {a}
+                </p>
+              </details>
+            ))}
+          </div>
+        </section>
       </main>
     </div>
   );
