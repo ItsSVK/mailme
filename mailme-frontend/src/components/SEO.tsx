@@ -1,63 +1,63 @@
-import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 
 interface SEOProps {
   title?: string;
   description?: string;
-  keywords?: string;
-  image?: string;
   url?: string;
-  type?: string;
   noindex?: boolean;
   canonical?: string;
 }
 
+const DEFAULT_TITLE = 'Free Temporary Email with Zero Trace | MailMe';
+const DEFAULT_DESCRIPTION =
+  'Create a free disposable email address instantly with MailMe. Protect your inbox from spam and keep your real email private — no signup, auto-deletes in 24h.';
+
+// Find an existing head tag (from index.html) and update it in place, or
+// create it once if missing. Mutating the static tags avoids duplicates and
+// works reliably on every route change with React 19 / StrictMode.
+function setMeta(selector: string, attr: string, key: string, content: string) {
+  let el = document.head.querySelector<HTMLMetaElement>(selector);
+  if (!el) {
+    el = document.createElement('meta');
+    el.setAttribute(attr, key);
+    document.head.appendChild(el);
+  }
+  el.setAttribute('content', content);
+}
+
 const SEO = ({
-  title = 'MailMe - Temporary Email with Zero Trace | Disposable Email Service',
-  description = 'Create instant disposable email addresses with MailMe. Protect your real email from spam, advertising, and malware. No signup required, auto-deletes after 24 hours. Privacy-focused temporary email service.',
-  keywords = 'temporary email, disposable email, temp mail, fake email, throwaway email, privacy email, spam protection, anonymous email, burner email, temporary inbox',
-  image = 'https://mailme.itssvk.dev/og-image.png',
+  title = DEFAULT_TITLE,
+  description = DEFAULT_DESCRIPTION,
   url = 'https://mailme.itssvk.dev/',
-  type = 'website',
   noindex = false,
   canonical,
 }: SEOProps) => {
-  const robotsContent = noindex
-    ? 'noindex, nofollow'
-    : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+  useEffect(() => {
+    document.title = title;
 
-  return (
-    <Helmet>
-      {/* Primary Meta Tags */}
-      <title>{title}</title>
-      <meta name="title" content={title} />
-      <meta name="description" content={description} />
-      <meta name="keywords" content={keywords} />
-      <meta name="robots" content={robotsContent} />
-      <meta name="googlebot" content={robotsContent} />
+    const robots = noindex
+      ? 'noindex, nofollow'
+      : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
 
-      {/* Canonical URL */}
-      {canonical && <link rel="canonical" href={canonical} />}
+    setMeta('meta[name="description"]', 'name', 'description', description);
+    setMeta('meta[name="robots"]', 'name', 'robots', robots);
+    setMeta('meta[name="googlebot"]', 'name', 'googlebot', robots);
+    setMeta('meta[property="og:title"]', 'property', 'og:title', title);
+    setMeta('meta[property="og:description"]', 'property', 'og:description', description);
+    setMeta('meta[property="og:url"]', 'property', 'og:url', url);
+    setMeta('meta[name="twitter:title"]', 'name', 'twitter:title', title);
+    setMeta('meta[name="twitter:description"]', 'name', 'twitter:description', description);
 
-      {/* Open Graph / Facebook */}
-      <meta property="og:type" content={type} />
-      <meta property="og:url" content={url} />
-      <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
-      <meta property="og:image" content={image} />
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="630" />
-      <meta property="og:image:alt" content={title} />
-      <meta property="og:site_name" content="MailMe" />
+    let link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (!link) {
+      link = document.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      document.head.appendChild(link);
+    }
+    link.setAttribute('href', canonical ?? url);
+  }, [title, description, url, noindex, canonical]);
 
-      {/* Twitter Card */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:url" content={url} />
-      <meta name="twitter:title" content={title} />
-      <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={image} />
-      <meta name="twitter:image:alt" content={title} />
-    </Helmet>
-  );
+  return null;
 };
 
 export default SEO;

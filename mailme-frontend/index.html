@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <!-- Primary Meta Tags -->
-    <title>MailMe - Temporary Email with Zero Trace | Disposable Email Service</title>
-    <meta name="title" content="MailMe - Temporary Email with Zero Trace | Disposable Email Service" />
-    <meta name="description" content="Create instant disposable email addresses with MailMe. Protect your real email from spam, advertising, and malware. No signup required, auto-deletes after 24 hours. Privacy-focused temporary email service." />
-    <meta name="keywords" content="temporary email, disposable email, temp mail, fake email, throwaway email, privacy email, spam protection, anonymous email, burner email, temporary inbox" />
+    <title>Free Temporary Email with Zero Trace | MailMe</title>
+    <meta name="title" content="Free Temporary Email with Zero Trace | MailMe" />
+    <meta name="description" content="Create a free disposable email address instantly with MailMe. Protect your inbox from spam and keep your real email private — no signup, auto-deletes in 24h." />
     <meta name="author" content="Shouvik Mohanta" />
     <meta name="language" content="English" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
@@ -20,8 +19,8 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://mailme.itssvk.dev/" />
-    <meta property="og:title" content="MailMe - Temporary Email with Zero Trace" />
-    <meta property="og:description" content="Create instant disposable email addresses. Protect your real email from spam and malware. No signup required, privacy-focused temporary email service." />
+    <meta property="og:title" content="Free Temporary Email with Zero Trace | MailMe" />
+    <meta property="og:description" content="Create a free disposable email address instantly. Protect your inbox from spam and keep your real email private — no signup, auto-deletes in 24h." />
     <meta property="og:image" content="https://mailme.itssvk.dev/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -32,18 +31,27 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://mailme.itssvk.dev/" />
-    <meta name="twitter:title" content="MailMe - Temporary Email with Zero Trace" />
-    <meta name="twitter:description" content="Create instant disposable email addresses. Protect your real email from spam and malware. No signup required." />
+    <meta name="twitter:title" content="Free Temporary Email with Zero Trace | MailMe" />
+    <meta name="twitter:description" content="Create a free disposable email address instantly. Protect your inbox from spam — no signup, auto-deletes in 24h." />
     <meta name="twitter:image" content="https://mailme.itssvk.dev/og-image.png" />
     <meta name="twitter:image:alt" content="MailMe - Temporary Email with Zero Trace" />
     
     <!-- Favicon and Icons -->
     <link rel="icon" type="image/svg+xml" href="/mailme.svg" />
-    <link rel="apple-touch-icon" href="/mailme.svg" />
-    
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Fonts (preconnect + non-blocking load) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Preload the Latin upright Nunito Sans subset to cut LCP. Pinned to the
+         gstatic v19 hash; if Google bumps the font version this URL 404s and the
+         preload silently no-ops — re-fetch the woff2 URL from the css2 link below. -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/nunitosans/v19/pe0AMImSLYBIv1o4X1M8ce2xCx3yop4tQpF_MeTm0lfUVwoNnq4CLz0_kJ3xzHGGVFM.woff2" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,300..900;1,6..12,300..900&display=swap" />
+
     <!-- Theme Color -->
-    <meta name="theme-color" content="#6366f1" />
-    <meta name="msapplication-TileColor" content="#6366f1" />
+    <meta name="theme-color" content="#15a06a" />
+    <meta name="msapplication-TileColor" content="#15a06a" />
     
     <!-- Additional SEO -->
     <meta name="format-detection" content="telephone=no" />
@@ -67,11 +75,6 @@
         "price": "0",
         "priceCurrency": "USD"
       },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "ratingCount": "1250"
-      },
       "creator": {
         "@type": "Person",
         "name": "Shouvik Mohanta"
@@ -94,7 +97,56 @@
       "name": "MailMe",
       "url": "https://mailme.itssvk.dev",
       "logo": "https://mailme.itssvk.dev/mailme.svg",
-      "sameAs": []
+      "sameAs": ["https://x.com/ShouvikMohanta"]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is MailMe free to use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. MailMe is completely free, with no signup, registration, or credit card required."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How long do temporary emails last?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Every email is automatically deleted 24 hours after it arrives, so nothing lingers on our servers."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do I need to create an account?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Just choose a username and your disposable inbox is ready instantly."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I reply to or send emails?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "MailMe is a receive-only inbox built for verifications and signups. You can read incoming mail, but not send or reply."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is it private and safe?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "MailMe keeps your real address hidden and auto-deletes every email after 24 hours. Keep in mind that inboxes are public and not password-protected — anyone who enters the same username can read that inbox. Pick a hard-to-guess username and never use MailMe for sensitive or personal mail."
+          }
+        }
+      ]
     }
     </script>
   </head>

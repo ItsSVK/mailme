@@ -54,19 +54,3 @@ export function useEmailDetails(
     staleTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
   });
 }
-
-/**
- * Hook to fetch emails since a specific date
- * @deprecated The new worker backend handles 24h retention automatically.
- */
-export function useEmailsSince(
-  username: string | undefined,
-  _since: string | undefined
-) {
-  return useQuery({
-    queryKey: ['emails', username],
-    queryFn: () => fetchEmails(username!),
-    enabled: !!username,
-    refetchOnWindowFocus: true,
-  });
-}

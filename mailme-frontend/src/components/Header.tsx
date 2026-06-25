@@ -12,16 +12,16 @@ const Header = () => {
   };
 
   return (
-    <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+    <header className="border-b border-border/60 bg-background/80 backdrop-blur-md sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-linear-to-br from-primary to-primary-glow flex items-center justify-center">
-            <Mail className="w-5 h-5 text-primary-foreground" />
+        <div
+          className="flex items-center gap-3 cursor-pointer group"
+          onClick={() => navigate('/')}
+        >
+          <div className="w-9 h-9 rounded-xl bg-background neu-sm flex items-center justify-center transition-all duration-200 group-hover:neu-md group-active:neu-inset">
+            <Mail className="w-5 h-5 text-primary" />
           </div>
-          <h1
-            className="text-lg font-bold text-foreground cursor-pointer"
-            onClick={() => navigate('/')}
-          >
+          <h1 className="text-lg font-bold text-foreground tracking-tight">
             MailMe
           </h1>
         </div>
@@ -39,6 +39,7 @@ const Header = () => {
             </span>
           </Button>
           <ThemeToggle />
+          {sessionStorage.getItem('mailboxUsername') && (
           <Button
             variant="outline"
             size="icon"
@@ -48,6 +49,7 @@ const Header = () => {
             <LogOut className="absolute h-5 w-5 scale-100 transition-all dark:scale-100" />
             <span className="sr-only">Logout</span>
           </Button>
+          )}
         </div>
       </div>
     </header>
