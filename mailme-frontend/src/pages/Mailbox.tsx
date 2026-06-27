@@ -26,11 +26,21 @@ function formatTimestamp(dateString: string): string {
   return date.toLocaleDateString();
 }
 
+// Decode HTML entities (&#8199; &amp; etc.) so previews show real chars, not raw markup
+function decodeEntities(s: string): string {
+  const el = document.createElement('textarea');
+  el.innerHTML = s;
+  return el.value;
+}
+
 // Convert API email to component email format
 function convertEmail(apiEmail: ApiEmail): Email {
   const preview = apiEmail.snippet || apiEmail.text || apiEmail.html || 'No content';
-  // Strip HTML tags for preview
-  const textPreview = preview.replace(/<[^>]*>/g, '').substring(0, 100);
+  // Strip HTML tags, decode entities, collapse whitespace for a clean one-line preview
+  const textPreview = decodeEntities(preview.replace(/<[^>]*>/g, ''))
+    .replace(/\s+/g, ' ')
+    .trim()
+    .substring(0, 100);
 
   return {
     id: apiEmail.id,
@@ -135,54 +145,51 @@ const Mailbox = () => {
       />
 
       <main className="flex-1 container mx-auto px-4 py-6">
-        <Card className="p-4 mb-6 flex flex-row items-center justify-between flex-wrap gap-4 animate-fade-in">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
+        <Card className="p-4 mb-6 animate-fade-in">
+          <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl bg-background neu-sm flex items-center justify-center shrink-0">
               <Mail className="w-5 h-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground mb-0.5">
                 Your temporary email
               </p>
-              <p className="text-lg font-semibold text-foreground truncate">
+              <p className="text-base font-semibold text-foreground truncate">
                 {tempEmail}
               </p>
             </div>
-          </div>
-
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleCopyEmail}
-              disabled={copied}
-              className="cursor-pointer"
-            >
-              {copied ? (
-                <Check className="w-4 h-4 mr-2 text-primary" />
-              ) : (
-                <Copy className="w-4 h-4 mr-2" />
-              )}
-              {copied ? 'Copied' : 'Copy'}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={isFetching}
-              className="cursor-pointer disabled:cursor-not-allowed"
-            >
-              <RefreshCw
-                className={`w-4 h-4 mr-2 ${isFetching ? 'animate-spin' : ''}`}
-              />
-              Refresh
-            </Button>
+            <div className="flex gap-2 shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopyEmail}
+                disabled={copied}
+                className="cursor-pointer w-9 sm:w-auto px-2 sm:px-3"
+              >
+                {copied ? (
+                  <Check className="w-4 h-4 shrink-0 text-primary" />
+                ) : (
+                  <Copy className="w-4 h-4 shrink-0" />
+                )}
+                <span className="hidden sm:inline ml-2">{copied ? 'Copied' : 'Copy'}</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isFetching}
+                className="cursor-pointer disabled:cursor-not-allowed w-9 sm:w-auto px-2 sm:px-3"
+              >
+                <RefreshCw className={`w-4 h-4 shrink-0 ${isFetching ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline ml-2">Refresh</span>
+              </Button>
+            </div>
           </div>
         </Card>
 
         <div className="grid lg:grid-cols-5 gap-6">
           <div
-            className={`lg:col-span-2 ${selectedEmailId ? 'hidden lg:block' : ''
+            className={`lg:col-span-2 min-w-0 ${selectedEmailId ? 'hidden lg:block' : ''
               }`}
           >
             {isLoading ? (
@@ -199,7 +206,7 @@ const Mailbox = () => {
           </div>
 
           <div
-            className={`lg:col-span-3 ${!selectedEmailId ? 'hidden lg:block' : ''
+            className={`lg:col-span-3 min-w-0 ${!selectedEmailId ? 'hidden lg:block' : ''
               }`}
           >
             <EmailView

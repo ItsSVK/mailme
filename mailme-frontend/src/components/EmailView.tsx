@@ -67,18 +67,32 @@ const EmailView = ({ email, isLoading, onBack }: EmailViewProps) => {
     style.textContent = `
       html, body {
         margin: 0 !important;
+        max-width: 100% !important;
         overflow-x: hidden !important;
         scrollbar-width: none !important;
         -ms-overflow-style: none !important;
       }
-      /* Zero-specificity default: plain emails get breathing room,
-         but emails that set their own padding (full-bleed designs) win. */
       :where(html, body) {
         padding: 16px;
       }
       html::-webkit-scrollbar,
       body::-webkit-scrollbar {
         display: none !important;
+      }
+      /* Force fixed-width email tables to fit mobile viewport */
+      table {
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+      td, th {
+        max-width: 100% !important;
+      }
+      img {
+        max-width: 100% !important;
+        height: auto !important;
+      }
+      * {
+        box-sizing: border-box !important;
       }
     `;
     (doc.head ?? doc.documentElement).appendChild(style);
@@ -181,7 +195,7 @@ const EmailView = ({ email, isLoading, onBack }: EmailViewProps) => {
         </div>
       )}
 
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
         {email.html ? (
           <>
             {/* Spinner shown until iframe onLoad fires */}

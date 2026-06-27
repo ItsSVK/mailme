@@ -31,8 +31,10 @@ const EmailList = ({
             type="button"
             onClick={() => onSelectEmail(email.id)}
             className={cn(
-              'w-full text-left p-4 rounded-xl bg-background border border-border/60 cursor-pointer transition-all duration-200 animate-slide-up',
-              isSelected ? 'neu-inset' : 'neu-sm hover:neu-md'
+              'w-full text-left p-4 rounded-xl bg-background border border-border/60 cursor-pointer transition-all duration-200 animate-slide-up overflow-hidden',
+              isSelected
+                ? 'neu-inset'
+                : 'neu-sm hover:neu-md active:neu-inset active:scale-[0.99]'
             )}
             style={{ animationDelay: `${Math.min(i * 0.05, 0.4)}s` }}
           >
