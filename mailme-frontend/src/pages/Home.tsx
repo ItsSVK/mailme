@@ -48,6 +48,7 @@ const FAQS = [
 const Home = () => {
   const [username, setUsername] = useState('');
   const [isValidUsername, setIsValidUsername] = useState(false);
+  const [openFaq, setOpenFaq] = useState<string | null>(null);
   const navigate = useNavigate();
   const { mutateAsync, isPending } = useCreateMailbox();
 
@@ -94,7 +95,7 @@ const Home = () => {
           <div className="text-center mb-8 animate-fade-in">
             <h1 className="text-5xl md:text-6xl font-bold text-foreground leading-tight mb-3">
               Temporary email
-              <span className="block text-primary">
+              <span className="block bg-linear-to-r from-primary to-accent bg-clip-text text-transparent pb-1">
                 with zero trace
               </span>
             </h1>
@@ -200,9 +201,10 @@ const Home = () => {
             {STEPS.map((step, i) => (
               <div
                 key={step.title}
-                className="p-6 rounded-xl bg-background neu-md flex flex-col items-center text-center"
+                className="group p-6 rounded-xl bg-background neu-md hover:neu-lg hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center animate-slide-up"
+                style={{ animationDelay: `${i * 0.1}s` }}
               >
-                <div className="w-12 h-12 rounded-full bg-primary shadow-brand flex items-center justify-center text-primary-foreground font-bold text-lg mb-4">
+                <div className="w-12 h-12 rounded-full bg-primary shadow-brand flex items-center justify-center text-primary-foreground font-bold text-lg mb-4 transition-transform duration-300 group-hover:scale-110">
                   {i + 1}
                 </div>
                 <h3 className="font-semibold text-foreground mb-2">{step.title}</h3>
@@ -220,20 +222,37 @@ const Home = () => {
             Frequently asked questions
           </h2>
           <div className="space-y-3">
-            {FAQS.map(({ q, a }) => (
-              <details
-                key={q}
-                className="group rounded-xl bg-background neu-sm open:neu-md transition-all duration-200 overflow-hidden"
-              >
-                <summary className="flex items-center justify-between gap-4 cursor-pointer list-none p-5 font-semibold text-foreground">
-                  {q}
-                  <ChevronDown className="w-5 h-5 text-primary shrink-0 transition-transform duration-200 group-open:rotate-180" />
-                </summary>
-                <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
-                  {a}
-                </p>
-              </details>
-            ))}
+            {FAQS.map(({ q, a }) => {
+              const isOpen = openFaq === q;
+              return (
+                <div
+                  key={q}
+                  className={`rounded-xl bg-background transition-shadow duration-300 ${isOpen ? 'neu-md' : 'neu-sm'}`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(isOpen ? null : q)}
+                    className="flex w-full items-center justify-between gap-4 cursor-pointer p-5 font-semibold text-foreground text-left"
+                    aria-expanded={isOpen}
+                  >
+                    {q}
+                    <ChevronDown
+                      className={`w-5 h-5 text-primary shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+                  {/* grid 0fr→1fr animates height with pure CSS, no JS measuring */}
+                  <div
+                    className={`grid transition-[grid-template-rows] duration-300 ease-out ${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
+                        {a}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
       </main>
