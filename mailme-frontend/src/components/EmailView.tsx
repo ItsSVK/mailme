@@ -3,16 +3,29 @@ import { Card } from '@/components/ui/card';
 import { ArrowLeft, Mail, Loader2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-// Labeled match first ("code: 123456"), then bare standalone 4-8 digit block.
-// Skips years (1900-2099) and common phone-number-like contexts.
-function extractOTP(text: string): string | null {
-  const labeled = text.match(
-    /(?:otp|one[\s-]*time|passcode|pin|verification[\s-]*code|confirm(?:ation)?[\s-]*code|security[\s-]*code|access[\s-]*code|auth(?:entication)?[\s-]*code)[^\d]{0,30}(\d{4,8})/i
-  );
-  if (labeled) return labeled[1];
+const isYear = (s: string) => /^(19|20)\d{2}$/.test(s);
 
-  const bare = text.match(/(?<!\d)(\d{4,8})(?!\d)/);
-  return bare?.[1] ?? null;
+// Conservative OTP detection. Only fires when there's real OTP context, so
+// random numbers (prices, order IDs, dates) are never flagged as codes.
+function extractOTP(text: string): string | null {
+  // 1. Strong: an OTP code-word directly followed by a 4-8 digit number.
+  const labeled = text.match(
+    /(?:otp|one[\s-]*time[\s-]*(?:code|password|passcode|pin)?|passcode|verification[\s-]*code|confirm(?:ation)?[\s-]*code|security[\s-]*code|access[\s-]*code|auth(?:entication)?[\s-]*code|login[\s-]*code|sign[\s-]*in[\s-]*code|your[\s-]*code|code[\s-]*(?:is|:))[^\d]{0,20}(\d{4,8})\b/i
+  );
+  if (labeled && !isYear(labeled[1])) return labeled[1];
+
+  // 2. Weak: a number alone on its own line, but ONLY when the email clearly
+  //    talks about codes/verification somewhere. Catches "Your code:\n\n123456".
+  const hasOtpContext =
+    /\b(otp|verif|one[\s-]*time|passcode|2fa|two[\s-]*factor|authenticat|sign[\s-]*in|log[\s-]*in)\b/i.test(
+      text
+    );
+  if (hasOtpContext) {
+    const standalone = text.match(/(?:^|\n)\s*(\d{4,8})\s*(?:\n|$)/);
+    if (standalone && !isYear(standalone[1])) return standalone[1];
+  }
+
+  return null;
 }
 
 interface EmailViewProps {

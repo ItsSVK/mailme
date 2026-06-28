@@ -3,7 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { ArrowRight, Shield, Clock, Zap, Mail, ChevronDown } from 'lucide-react';
+import { ArrowRight, Shield, Clock, Zap, Mail, ChevronDown, Shuffle } from 'lucide-react';
+
+const ADJS = ['swift', 'quiet', 'bold', 'calm', 'dark', 'wild', 'cool', 'fast', 'bright', 'silver', 'crisp', 'clean'];
+const NOUNS = ['fox', 'river', 'cloud', 'stone', 'wave', 'fire', 'wind', 'star', 'hawk', 'pine', 'reed', 'oak'];
+
+function randomUsername(): string {
+  const adj = ADJS[Math.floor(Math.random() * ADJS.length)];
+  const noun = NOUNS[Math.floor(Math.random() * NOUNS.length)];
+  const num = Math.floor(Math.random() * 9000) + 1000;
+  return `${adj}${noun}${num}`;
+}
 import SEO from '@/components/SEO';
 import { useCreateMailbox } from '@/hooks/useMailbox';
 
@@ -108,12 +118,24 @@ const Home = () => {
           <Card className="p-6 neu-lg animate-slide-up" style={{ animationDelay: '0.1s' }}>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label
-                  htmlFor="username"
-                  className="block text-sm font-medium text-foreground mb-2"
-                >
-                  Choose your username
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label
+                    htmlFor="username"
+                    className="text-sm font-medium text-foreground"
+                  >
+                    Choose your username
+                  </label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setUsername(randomUsername())}
+                    className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1 cursor-pointer"
+                  >
+                    <Shuffle className="w-3 h-3" />
+                    Random
+                  </Button>
+                </div>
                 <Input
                   id="username"
                   type="text"

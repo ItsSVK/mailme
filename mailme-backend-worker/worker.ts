@@ -6,6 +6,18 @@ export interface Env {
   DOMAIN: string;
 }
 
+const USERNAME_REGEX = /^[a-z0-9](?!.*\.\.)[a-z0-9._-]{1,28}[a-z0-9]$/;
+const RATE_LIMIT = 20; // per IP per hour
+
+// Reserved usernames — block role/system addresses from being squatted and
+// used to read mail intended for the operator (e.g. password resets to admin@).
+const RESERVED_USERNAMES = new Set([
+  'admin', 'administrator', 'root', 'support', 'info', 'help', 'contact',
+  'postmaster', 'webmaster', 'hostmaster', 'noreply', 'no-reply', 'donotreply',
+  'abuse', 'security', 'mail', 'mailer-daemon', 'daemon', 'system', 'billing',
+  'sales', 'team', 'staff', 'office', 'service', 'test', 'mailme',
+]);
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
@@ -27,7 +39,24 @@ export default {
       // POST /api/mails - Create or get mailbox
       if (path === '/api/mails' && method === 'POST') {
         const { username } = await request.json() as { username: string };
-        if (!username) return new Response('Username required', { status: 400, headers: corsHeaders });
+        if (!username) return new Response(JSON.stringify({ error: 'Username required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+
+        if (!USERNAME_REGEX.test(username)) {
+          return new Response(JSON.stringify({ error: 'Invalid username' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+
+        if (RESERVED_USERNAMES.has(username.toLowerCase())) {
+          return new Response(JSON.stringify({ error: 'Username not available' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+
+        // Rate limit by IP: max RATE_LIMIT mailbox creations per hour
+        const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+        const rlKey = `rl:${ip}`;
+        const rlCount = parseInt(await env.EMAILS_KV.get(rlKey) || '0');
+        if (rlCount >= RATE_LIMIT) {
+          return new Response(JSON.stringify({ error: 'Too many requests. Try again later.' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+        await env.EMAILS_KV.put(rlKey, String(rlCount + 1), { expirationTtl: 3600 });
 
         const id = crypto.randomUUID();
         const domain = env.DOMAIN || 'mailme.itssvk.dev';
@@ -82,11 +111,16 @@ export default {
 
           const content = await env.EMAILS_KV.get<{ text: string, html: string }>(emailId, 'json');
 
+          if (!content) {
+            // KV TTL expired but D1 row not yet cleaned by cron — email is gone
+            return new Response(JSON.stringify({ error: 'Email content has expired' }), { status: 410, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }
+
           return new Response(JSON.stringify({
             ...emailMetadata,
             createdAt: emailMetadata.created_at,
-            text: content?.text || '',
-            html: content?.html || ''
+            text: content.text || '',
+            html: content.html || ''
           }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
@@ -165,12 +199,16 @@ export default {
   async scheduled(event: any, env: Env, ctx: ExecutionContext): Promise<void> {
     console.log('[Worker] Running scheduled cleanup...');
     try {
-      // Delete emails older than 24 hours
-      const result = await env.DB.prepare(
+      const emailResult = await env.DB.prepare(
         "DELETE FROM emails WHERE created_at < datetime('now', '-24 hours')"
       ).run();
-      
-      console.log(`[Worker] Cleanup complete. Deleted ${result.meta.changes} old emails.`);
+
+      // Delete mailboxes older than 7 days that have no remaining emails
+      const mailboxResult = await env.DB.prepare(
+        "DELETE FROM mailboxes WHERE created_at < datetime('now', '-7 days') AND id NOT IN (SELECT DISTINCT mailbox_id FROM emails)"
+      ).run();
+
+      console.log(`[Worker] Cleanup complete. Deleted ${emailResult.meta.changes} emails, ${mailboxResult.meta.changes} mailboxes.`);
     } catch (err) {
       console.error('[Worker] Cleanup failed:', err);
     }
