@@ -85,6 +85,9 @@ export async function fetchEmailDetails(
   const response = await fetch(url.toString());
 
   if (!response.ok) {
+    if (response.status === 410) {
+      throw new Error('Email content has expired and can no longer be retrieved.');
+    }
     const error = await response
       .json()
       .catch(() => ({ error: 'Unknown error' }));
